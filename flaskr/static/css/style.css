@@ -1,0 +1,32 @@
+/* css/style.css */
+
+/* Reset some default browser styles */
+body, h1, p {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+/* Style the body */
+body {
+    font-family: Arial, sans-serif;
+    line-height: 1.6;
+    background-color: #E0E1DD;
+    color: #333;
+    padding: 20px;
+}
+
+/* Style the header */
+h1 {
+    color: #008DD5;
+    font-size: 2em;
+    margin-bottom: 10px;
+}
+
+/* Style the paragraph */
+p {
+    font-size: 1em;
+    margin-top: 10px;
+    color: #5D576B;
+}
+
