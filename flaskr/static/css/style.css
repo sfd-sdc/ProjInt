@@ -1,7 +1,7 @@
 /* css/style.css */
 
 /* Reset some default browser styles */
-body, h1, p {
+* {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
@@ -17,6 +17,32 @@ body {
 }
 
 /* Style the header */
+
+.nav-bar {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+hr {
+    outline: #008DD5 solid 1px;
+    border: #008DD5 solid 1px;
+    margin-top: 5px;
+}
+
+.content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding-top: 30px;
+    margin-right: auto;
+    margin-left: auto;
+    margin-top: 30px;
+    padding-bottom: 30px;
+    outline: #008DD5 solid 2px;
+    width: 300px;
+}
+
 h1 {
     color: #008DD5;
     font-size: 2em;

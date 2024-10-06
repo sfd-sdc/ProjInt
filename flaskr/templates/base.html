@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="pt">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title> {% block title %}{% endblock %} - SDC Bank</title>
+        <link href="static/css/style.css" rel="stylesheet">
+    </head>
+    <body>
+        <nav class='nav-bar'>
+            <h1>SDC Bank</h1>
+            {% block nav %}{% endblock %}
+        </nav>
+        <hr>
+        <div id="content" class='content'>
+            {% block content %}{% endblock %}
+        </div>
+    </body>
+</html>
