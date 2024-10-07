@@ -1,13 +1,15 @@
-from flask import Flask, render_template, url_for
+from flask import Flask, render_template
 
 app = Flask(__name__)
 
 
 @app.route('/')
 def Home():
+    message = 'Welcome to SDC Bank'
     data = {
         'title' : 'Home',
-        'navTitle' : 'SDC Bank'
+        'navTitle' : 'SDC Bank',
+        'message': message
     }
     return render_template('index.html', data=data)
 

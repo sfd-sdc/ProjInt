@@ -4,8 +4,10 @@
 {% block nav %} {{ data.page }} {% endblock %}
 
 {% block content %}
-    <h2>{{ data.name }}</h2>
-    <p><strong>Name:</strong> {{ data.name }}</p>
-    <p><strong>Email:</strong> {{ data.email }}</p>
-    <p><strong>Saldo da conta:</strong> {{ data.saldo }} $</p>
+    <div class="content">
+        <h2>{{ data.name }}</h2>
+            <p><strong>Name:</strong> {{ data.name }}</p>
+            <p><strong>Email:</strong> {{ data.email }}</p>
+            <p><strong>Saldo da conta:</strong> {{ data.saldo }} $</p>
+    </div>
 {% endblock %}
