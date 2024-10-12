@@ -1,30 +1,40 @@
 <!DOCTYPE html>
 <html lang="pt">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
-</head>
-<body>
-    <form action="/submit-form" method="POST">
-        <label for="fullname">Nome completo:</label><br>
-        <input type="text" id="fullname" name="fullname"><br><br>
-        
-        <label for="address">Morada:</label><br>
-        <input type="text" id="address" name="address"><br><br>
-        
-        <label for="dob">Data de nascimento:</label><br>
-        <input type="date" id="dob" name="dob"><br><br>
-        
-        <label for="email">Email:</label><br>
-        <input type="email" id="email" name="email"><br><br>
-        
-        <label for="phone">Número de telemóvel:</label><br>
-        <input type="tel" id="phone" name="phone"><br><br>
-        
-        <input type="submit" value="Submeter">
-      </form>
-      
-      
-</body>
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Document</title>
+    </head>
+    <body>
+        <form action="/submit-form" method="POST">
+            <label for="fullname">Nome completo:</label><br />
+            <input type="text" id="fullname" name="fullname" required /><br /><br />
+
+            <label for="address">Morada:</label><br />
+            <input type="text" id="address" name="address" required /><br /><br />
+
+            <label for="dob">Data de nascimento:</label><br />
+            <input type="date" id="dob" name="dob" required /><br /><br />
+
+            <label for="email">Email:</label><br />
+            <input type="email" id="email" name="email" required /><br /><br />
+
+            <label for="phone">Número de telemóvel:</label><br />
+            <input type="tel" id="phone" name="phone" required /><br /><br />
+
+            <label for="password">Palavra passe:</label><br />
+            <input type="password" id="password" name="password" required /><br /><br />
+
+            <label for="confirm-password">Confirmar palavra passe:</label><br />
+            <input
+                type="password"
+                id="confirm-password"
+                name="confirm-password"
+                required
+                oninput="this.setCustomValidity(this.value != document.getElementById('password').value ? 'As senhas não coincidem.' : '')"
+            /><br /><br />
+
+            <input type="submit" value="Submeter" />
+        </form>
+    </body>
 </html>
