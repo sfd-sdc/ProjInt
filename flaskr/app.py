@@ -1,8 +1,8 @@
-from flask import Flask, render_template, request, jsonify
+from flask import Flask, render_template, request
 from supabase_client import supabase
 app = Flask(__name__)
 
-
+#TODO: save user`s data in our database
 @app.route('/')
 def Home():
     message = 'Welcome to SDC Bank'
@@ -25,31 +25,41 @@ def user():
     }
     return render_template('user.html', data=user)
 
-@app.route('/login')
+@app.route('/signup')
+def singup():
+    return render_template('signup.html', data='Novo Utilizador')
+
+@app.route('/signin')
+def signin():
+    return render_template('login.html', data='Login')
+
+@app.route('/login', methods=['POST'])
 def login():
-    data = request.get_json()
-    email = data.get('email')
-    password = data.get('password')
+    # data = request.get_json()
+    email = request.form["email"]
+    password = request.form["password"]
     response = supabase.auth.sign_in_with_password({
         'email': email,
         'password': password,
     })
-    return jsonify({"message": "User Loged In succesfully"}), 201
+    #TODO: redirect to user`s dashboard
+    return render_template('index.html', data='HomePage')
 
 @app.route('/createUser', methods=['POST'])
 def createUser():
-    data = request.get_json()
+    # data = request.get_json()
 
     # Extract email and password from the data
-    email = data.get('email')
-    password = data.get('password')
+    email = request.form["email"]
+    password = request.form["password"]
 
     response = supabase.auth.sign_up({
         'email': email,
         'password': password,
     })
 
-    return jsonify({"message": "User created successfully"}), 201
+    #TODO: construct a page with information to user go to email for confirmation
+    return render_template('index.html', data='HomePage')
 
 if __name__ == '__main__':
     app.run(debug=True, port=5000, host='0.0.0.0')
