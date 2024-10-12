@@ -24,10 +24,10 @@ Go to supabase (https://supabase.com) and select your project:
 - Project Settings > API 
 
 In API Settings, copy your project URL (not the url on the browser) and paste in the URL field in.env file
-![alt text]/docs/url.png "URL example image")
+<img src="docs/url.png"/>
 
 In Project API KEYS, copy anon/public key and paste it in the KEY field in.env file
-![alt text]/docs/apiKey.png "API KEY example image")
+<img src="docs/apiKey.png"/>
 
 ## Usage
 
@@ -37,7 +37,7 @@ In the root of the project run:
 python3 flaskr/app.py
 ```
 
-Go to your browser and navigate to: localhost:5000
+Go to your browser and navigate to: https://localhost:5000
 
 This project is being developed by:
 - Pedro Espirito Santo
