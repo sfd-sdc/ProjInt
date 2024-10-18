@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+
+{% block title %} {{ data.name }} {% endblock  %}
+{% block nav %} {{ data.page }} {% endblock %}
+
+{% block content %}
+    <h3>Informação do Utilizador </h3>
+    <ul>
+        <li>Nome completo: {{  }}</li>
+        <li>Morada: {{  }}</li>
+        <li>Data de Nascimento: {{  }}</li>
+        <li>Email: {{  }}</li>
+        <li>Número de Telemóvel: {{  }}</li>
+    </ul>
+
+    {% for conta in contas %}
+        <h3>Informação da Conta Bancária {{ conta.id }}</h3>
+        <ul>
+            <li>Tipo: {{ conta.acc_type }}</li>
+            <li>
+                <details>
+                    <summary>Clique aqui para ver o saldo</summary>
+                    Saldo: {{ conta.acc_amount }}
+                </details>
+            </li>
+        </ul>
+    {% endfor %}
+{% endblock %}
