@@ -5,25 +5,28 @@
 
 {% block content %}
     <form action="/createUser" method="POST">
-        <label for="fullname">Nome completo:</label><br />
+        <label for="fullname">Nome Completo:</label><br />
         <input type="text" id="fullname" name="fullname" required /><br /><br />
+
+        <label for="num">Número de Identificação:</label><br />
+        <input type="text" id="num" name="num" required /><br /><br />
 
         <label for="address">Morada:</label><br />
         <input type="text" id="address" name="address" required /><br /><br />
 
-        <label for="date">Data de nascimento:</label><br />
+        <label for="date">Data de Nascimento:</label><br />
         <input type="date" id="date" name="date" required /><br /><br />
 
         <label for="email">Email:</label><br />
         <input type="email" id="email" name="email" required /><br /><br />
 
-        <label for="phone">Número de telemóvel:</label><br />
+        <label for="phone">Número de Telemóvel:</label><br />
         <input type="tel" id="phone" name="phone" required /><br /><br />
 
-        <label for="password">Palavra passe:</label><br />
+        <label for="password">Palavra Passe:</label><br />
         <input type="password" id="password" name="password" required /><br /><br />
 
-        <label for="confirm-password">Confirmar palavra passe:</label><br />
+        <label for="confirm-password">Confirmar Palavra Passe:</label><br />
         <input type="password" id="confirm-password" name="confirm-password" required oninput="this.setCustomValidity(this.value != document.getElementById('password').value ? 'As senhas não coincidem.' : '')"/><br /><br />
 
         <input type="submit" value="Submeter" />
