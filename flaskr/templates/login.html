@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 
-{% block title %} {{ data.name }} {% endblock  %}
-{% block nav %} {{ data.page }} {% endblock %}
+{% block title %} {{ data.title }} {% endblock  %}
+{% block nav %} {{ data.navTitle }} {% endblock %}
 
 {% block content %}
     <form action="/login" method="POST">
@@ -12,5 +12,6 @@
         <input type="password" id="password" name="password" required /><br /><br />
 
         <input type="submit" value="Login" />
+        <p>{{ data.message }}</p>
     </form>
 {% endblock %}
