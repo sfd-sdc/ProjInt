@@ -1,6 +1,5 @@
-from flask import Flask, redirect, render_template, request, jsonify 
+from flask import Flask, redirect, render_template, request, url_for 
 from supabase_client import supabase
-import json
 
 app = Flask(__name__)
 
@@ -14,18 +13,6 @@ def Home():
     }
     return render_template('index.html', data=data)
 
-@app.route('/user')
-def user():
-    # os dados a serem mostrados no frontend vao ser obtidos atraves de querys a base de dados
-    
-    user = {
-        'page': 'Dashboard',
-        'name' : 'Pedro Santo',
-        'email' : 'pedro@pedrosanto.pt',
-        'saldo' : '2000'
-    }
-    return render_template('user.html', data=user)
-
 @app.route('/signup')
 def singup():
     return render_template('signup.html', data='Novo Utilizador')
@@ -34,8 +21,23 @@ def singup():
 def signin():
     return render_template('login.html', data='Login')
 
+@app.route('/dashboard/<id>', methods=['GET'])
+def dashboard(id):
+    try:
+        data = getUser(id)
+        return render_template('user_dashboard.html', data=data)
+    except:
+        data = {
+            'title' : 'Login',
+            'navTitle' : 'SDC Bank',
+            'message': 'You need to login'
+        }
+        return redirect('../signin')
+
+# API routes
 @app.route('/login', methods=['POST'])
 def login():
+    session = None
     try:
         email = request.form["email"]
         password = request.form["password"]
@@ -44,15 +46,23 @@ def login():
             'password': password,
 
         })
-    
-        response = supabase.table('users') \
-        .select('id') \
-        .eq('user_email', email) \
-        .execute()
+        print(session.session)
+        if session.session:
+            response = supabase.table('users') \
+            .select('id') \
+            .eq('user_email', email) \
+            .execute()
 
-        id = response.data[0]['id']
+            id = response.data[0]['id']
+            return redirect(f'/dashboard/{id}')
+        else:
 
-        return redirect(f'/dashboard/{id}')
+            data = {
+                'title' : 'Login',
+                'navTitle' : 'SDC Bank',
+                'message': 'You need to login'
+            }
+            return redirect(url_for('../login', data=data))
 
     except:
         data = {
@@ -62,6 +72,10 @@ def login():
         }
         return render_template('login.html', data=data)
 
+@app.route('/logout', methods=['GET'])
+def logout():
+    response = supabase.auth.sign_out()
+    return redirect('../signin')
 
 @app.route('/createUser', methods=['POST'])
 def createUser():
@@ -99,10 +113,6 @@ def getUser(id):
     .execute()
     return response.data[0]
 
-@app.route('/dashboard/<id>', methods=['GET'])
-def dashboard(id):
-    data = getUser(id)
-    return render_template('user_dashboard.html', data=data)
 
 if __name__ == '__main__':
     app.run(debug=True, port=5000, host='0.0.0.0')
