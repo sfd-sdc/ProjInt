@@ -18,11 +18,12 @@
         <ul>
             <li>Tipo: {{ data }}</li>
             <li>
-                <details>
-                    <summary>Clique aqui para ver o saldo</summary>
                     Saldo: {{ data }}
                 </details>
             </li>
         </ul>
     {% endfor %}
+    <form action="/logout" method="get">
+        <button type="submit">Sair</button>
+    </form>
 {% endblock %}
