@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+
+{% block title %} {{ data.user_fullname }} {% endblock  %}
+{% block nav %} {{ data.user_fullname }} {% endblock %}
+
+{% block content %}
+    <h3>Informação do Utilizador </h3>
+    <ul>
+        <li>Nome completo: {{ data.user_fullname }}</li>
+        <li>Morada: {{ data.user_address }}</li>
+        <li>Data de Nascimento: {{ data.user_birthdate }}</li>
+        <li>Email: {{ data.user_email }}</li>
+        <li>Número de Telemóvel: {{ data.user_phone }}</li>
+    </ul>
+
+    {% for conta in contas %}
+        <h3>Informação da Conta Bancária {{ data }}</h3>
+        <ul>
+            <li>Tipo: {{ data }}</li>
+            <li>
+                    Saldo: {{ data }}
+                </details>
+            </li>
+        </ul>
+    {% endfor %}
+    <form action="/logout" method="get">
+        <button type="submit">Sair</button>
+    </form>
+{% endblock %}

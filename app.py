@@ -1,6 +1,5 @@
 from flask import Flask, redirect, render_template, request, url_for 
 from supabase_client import supabase
-from random import randint
 
 app = Flask(__name__)
 
@@ -34,34 +33,6 @@ def dashboard(id):
             'message': 'You need to login'
         }
         return redirect('../signin')
-
-#-------------------------------Definir número de utilizador-----------------------------
-def create_user_number():
-    bank_code = "8226"
-    # Gera o número de utilizador
-    user_number = randint(0, 999)
-    user_final_number = f"{bank_code}{user_number:03}"
-    return user_final_number
-
-def insert_auth(email, password):
-    response = supabase.auth.sign_up({
-        'email': email,
-        'password': password,
-    })
-    data = {'user_email': request.form['email'],
-            'user_fullname': request.form['full_name'],
-            'user_address': request.form['address'],
-            'user_doc_num': request.form['doc_num'],
-            'user_birthdate': request.form['date'],
-            'user_phone': request.form['phone'],
-            'user_num': create_user_number()
-            }
-
-    response = (
-        supabase.table("users")
-        .insert(data)
-        .execute()
-    )
 
 # API routes
 @app.route('/login', methods=['POST'])
@@ -113,12 +84,24 @@ def createUser():
     # Extract email and password from the data
     email = request.form["email"]
     password = request.form["password"]
-    while True:
-        try:
-            insert_auth(email, password)
-            break
-        except:
-            pass
+
+    response = supabase.auth.sign_up({
+        'email': email,
+        'password': password,
+    })
+    data = {'user_email': request.form['email'],
+            'user_fullname': request.form['fullname'],
+            'user_address': request.form['address'],
+            'user_doc_num': request.form['num'],
+            'user_birthdate': request.form['date'],
+            'user_phone': request.form['phone']
+            }
+
+    response = (
+    supabase.table("users")
+        .insert(data)
+        .execute()
+)
 
     #TODO: construct a page with information to user go to email for confirmation
     return render_template('index.html', data='HomePage')
