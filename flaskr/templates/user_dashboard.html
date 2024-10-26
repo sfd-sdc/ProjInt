@@ -14,15 +14,22 @@
     </ul>
 
     {% for conta in contas %}
-        <h3>Informação da Conta Bancária {{ data }}</h3>
+        <h3>Informação da Conta Bancária {{ data.id }}</h3>
         <ul>
-            <li>Tipo: {{ data }}</li>
+            <li>Tipo: {{ data.acc_type }}</li>
             <li>
-                    Saldo: {{ data }}
+                <details>
+                    <summary>Saldo</summary>
+                    {{ data.acc_amount }}
                 </details>
             </li>
         </ul>
     {% endfor %}
+
+    <form action="/createAccount" method="post">
+        <button type="submit">Criar Conta</button>
+    </form>
+
     <form action="/logout" method="get">
         <button type="submit">Sair</button>
     </form>
