@@ -22,11 +22,16 @@ def singup():
 def signin():
     return render_template('login.html', data='Login')
 
+@app.route('/createAccount', methods=['POST'])
+def createNewAcc():
+    return render_template('create_account.html', data='data')
+
 @app.route('/dashboard/<id>', methods=['GET'])
 def dashboard(id):
+    global idData
     try:
-        data = getUser(id)
-        return render_template('user_dashboard.html', data=data)
+        idData = getUser(id)
+        return render_template('user_dashboard.html', data=idData)
     except:
         data = {
             'title' : 'Login',
@@ -35,34 +40,44 @@ def dashboard(id):
         }
         return redirect('../signin')
 
+
 #-------------------------------Definir número de utilizador-----------------------------
 def create_user_number():
     bank_code = "8226"
     # Gera o número de utilizador
-    user_number = randint(0, 999)
-    user_final_number = f"{bank_code}{user_number:03}"
+    user_number = randint(0, 999999)
+    user_final_number = f"{bank_code}{user_number:06}"
     return user_final_number
 
-def insert_auth(email, password):
-    response = supabase.auth.sign_up({
-        'email': email,
-        'password': password,
-    })
+def insert_user():
+    number = create_user_number()
     data = {'user_email': request.form['email'],
-            'user_fullname': request.form['full_name'],
+            'user_fullname': request.form['fullname'],
             'user_address': request.form['address'],
-            'user_doc_num': request.form['doc_num'],
+            'user_doc_num': request.form['num'],
             'user_birthdate': request.form['date'],
             'user_phone': request.form['phone'],
-            'user_num': create_user_number()
+            'user_num': number,
             }
 
-    response = (
+    res = (
         supabase.table("users")
         .insert(data)
         .execute()
     )
-
+    # criacao conta bancaria default
+    return res.data[0]['id']
+def createBankAcc(id):
+    acc = {
+        'acc_type': 'Conta à ordem',
+        'acc_amount': 0.00,
+        'user_id': id,
+    }
+    response = (
+        supabase.table("user_bank_acc")
+        .insert(acc)
+        .execute()
+    )
 # API routes
 @app.route('/login', methods=['POST'])
 def login():
@@ -73,9 +88,8 @@ def login():
         session = supabase.auth.sign_in_with_password({
             'email': email,
             'password': password,
-
         })
-        print(session.session)
+
         if session.session:
             response = supabase.table('users') \
             .select('id') \
@@ -85,14 +99,12 @@ def login():
             id = response.data[0]['id']
             return redirect(f'/dashboard/{id}')
         else:
-
             data = {
                 'title' : 'Login',
                 'navTitle' : 'SDC Bank',
                 'message': 'You need to login'
             }
             return redirect(url_for('../login', data=data))
-
     except:
         data = {
             'title' : 'Login',
@@ -113,15 +125,33 @@ def createUser():
     # Extract email and password from the data
     email = request.form["email"]
     password = request.form["password"]
-    while True:
-        try:
-            insert_auth(email, password)
-            break
-        except:
-            pass
+
+    response = supabase.auth.sign_up({
+        'email': email,
+        'password': password,
+    })
+    try:
+        userId = insert_user()
+        createBankAcc(userId)
+    except Exception as e:
+        print ("An error occurred:", str(e))
 
     #TODO: construct a page with information to user go to email for confirmation
     return render_template('index.html', data='HomePage')
+
+@app.route('/create_accout')
+def createAcc():
+    data = {
+        'acc_type': request.form['account_type'],
+        'acc_amount': request.form['account_amout'],
+        'user_id': idData
+    }
+    response = (
+        supabase.table('user_bank_acc')
+        .insert(data)
+        .execute()
+    )
+    return redirect('/user_dashboard')
 
 def getUser(id):
     response = supabase.table('users') \
