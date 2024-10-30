@@ -30,8 +30,9 @@ def createNewAcc():
 def dashboard(id):
     global idData
     try:
+        user_acc = getUserAcc(id)
         idData = getUser(id)
-        return render_template('user_dashboard.html', data=idData)
+        return render_template('user_dashboard.html', data=[idData, user_acc])
     except:
         data = {
             'title' : 'Login',
@@ -160,7 +161,12 @@ def getUser(id):
     .execute()
     return response.data[0]
 
+def getUserAcc(id):
+    response = supabase.table('user_bank_acc') \
+    .select('acc_type, acc_amount') \
+    .eq('user_id', id) \
+    .execute()
+    return response.data[0]
 
 if __name__ == '__main__':
     app.run(debug=True, port=5000, host='0.0.0.0')
-
