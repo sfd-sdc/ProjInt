@@ -1,0 +1,16 @@
+{% extends "base.html" %} {% block title %} {{ data.title }} {% endblock %} {% block nav %} {{ data.navTitle }} {% endblock %} {% block content %}
+<form action="/confirmPayment" method="POST">
+    <p>Entidade: {{entity_name}}</p>
+    <p>Valor: {{amount}}</p>
+
+    <p>Deseja confirmar o pagamento?</p>
+
+    <form action="/pay" method="POST">
+        <button type="submit">Cancelar</button>
+    </form>
+
+    <form action="#" method="POST">
+        <button type="submit">Confirmar</button>
+    </form>
+</form>
+{% endblock %}
