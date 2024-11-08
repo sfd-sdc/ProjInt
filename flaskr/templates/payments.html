@@ -1,15 +1,16 @@
 {% extends "base.html" %}
 
-{% block title %} {{ data.name }} {% endblock  %}
+{% block title %} {{ data.title }} {% endblock  %}
 {% block nav %} {{ data.page }} {% endblock %}
 
 {% block content %}
-    <form action="#" method="POST">
+    <form action="/payment" method="POST">
         <label for="entity">Entidade:</label><br />
         <input type="text" id="entity" name="entity" required /><br /><br />
-
         <label for="amount">Montante:</label><br />
         <input type="text" id="amount" name="amount" required /><br /><br />
+
+        <p>{{ data.entity }}</p>
 
         <input type="submit" value="Pagar" />
     </form>
