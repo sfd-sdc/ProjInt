@@ -1,7 +1,9 @@
-from flask import Flask, redirect, render_template, request, url_for 
+from flask import Flask, redirect, render_template, request, url_for, session 
 from supabase_client import supabase
+from random import randint
 
 app = Flask(__name__)
+app.secret_key = 'SupaSecret'
 
 @app.route('/')
 def Home():
@@ -21,11 +23,18 @@ def singup():
 def signin():
     return render_template('login.html', data='Login')
 
+@app.route('/createAccount', methods=['POST'])
+def createNewAcc():
+    return render_template('create_account.html', data='data')
+
 @app.route('/dashboard/<id>', methods=['GET'])
 def dashboard(id):
+    global idData
     try:
-        data = getUser(id)
-        return render_template('user_dashboard.html', data=data)
+        user_acc = getUserAcc(id)
+        idData = getUser(id)
+        session['user_id'] = id
+        return render_template('user_dashboard.html', data=[idData, user_acc])
     except:
         data = {
             'title' : 'Login',
@@ -34,6 +43,52 @@ def dashboard(id):
         }
         return redirect('../signin')
 
+
+#-------------------------------Definir número de utilizador-----------------------------
+def create_user_number():
+    bank_code = "8226"
+    # Gera o número de utilizador
+    user_number = randint(0, 999999)
+    user_final_number = f"{bank_code}{user_number:06}"
+    return user_final_number
+
+def createIban(user_num):
+    randNum = randint(0, 999)
+    iban = f'{user_num}{randNum:03}'
+    # print(iban) 
+    return iban
+
+def insert_user():
+    number = create_user_number()
+    data = {'user_email': request.form['email'],
+            'user_fullname': request.form['fullname'],
+            'user_address': request.form['address'],
+            'user_doc_num': request.form['num'],
+            'user_birthdate': request.form['date'],
+            'user_phone': request.form['phone'],
+            'user_num': number,
+            }
+
+    res = (
+        supabase.table("users")
+        .insert(data)
+        .execute()
+    )
+    return res.data[0]['id']
+
+    # criacao conta bancaria default
+def createBankAcc(id, create_user_number):
+    acc = {
+        'acc_type': 'Conta à ordem',
+        'acc_amount': 0.00,
+        'user_id': id,
+        'acc_iban': createIban(create_user_number),
+    }
+    response = (
+        supabase.table("user_bank_acc")
+        .insert(acc)
+        .execute()
+    )
 # API routes
 @app.route('/login', methods=['POST'])
 def login():
@@ -44,9 +99,8 @@ def login():
         session = supabase.auth.sign_in_with_password({
             'email': email,
             'password': password,
-
         })
-        print(session.session)
+
         if session.session:
             response = supabase.table('users') \
             .select('id') \
@@ -56,14 +110,12 @@ def login():
             id = response.data[0]['id']
             return redirect(f'/dashboard/{id}')
         else:
-
             data = {
                 'title' : 'Login',
                 'navTitle' : 'SDC Bank',
                 'message': 'You need to login'
             }
             return redirect(url_for('../login', data=data))
-
     except:
         data = {
             'title' : 'Login',
@@ -76,7 +128,6 @@ def login():
 def logout():
     response = supabase.auth.sign_out()
     return redirect('../signin')
-
 @app.route('/createUser', methods=['POST'])
 def createUser():
     # data = request.get_json()
@@ -89,22 +140,38 @@ def createUser():
         'email': email,
         'password': password,
     })
-    data = {'user_email': request.form['email'],
-            'user_fullname': request.form['full_name'],
-            'user_address': request.form['address'],
-            'user_doc_num': request.form['doc_num'],
-            'user_birthdate': request.form['date'],
-            'user_phone': request.form['phone']
-            }
-
-    response = (
-    supabase.table("users")
-        .insert(data)
-        .execute()
-)
+    try:
+        userId = insert_user()
+        userNumber = create_user_number()
+        createBankAcc(userId, userNumber)
+    except Exception as e:
+        print ("An error occurred:", str(e))
 
     #TODO: construct a page with information to user go to email for confirmation
     return render_template('index.html', data='HomePage')
+
+@app.route('/create_account', methods=['POST'])
+def createAcc():
+    iban = createIban(create_user_number())
+    id = session.get('user_id')
+    print(id)
+    data = {
+        'acc_type': request.form['account_type'],
+        'acc_amount': request.form['account_amount'],
+        'user_id': id, 
+        'acc_iban': iban, 
+    }
+    print(data)
+    try:
+        response = (
+            supabase.table('user_bank_acc')
+            .insert(data)
+            .execute()
+        )
+        return redirect(f'/dashboard/{id}')
+    except Exception as e:
+        print ("An error occurred:", str(e))
+        return redirect('/')
 
 def getUser(id):
     response = supabase.table('users') \
@@ -113,6 +180,12 @@ def getUser(id):
     .execute()
     return response.data[0]
 
+def getUserAcc(id):
+    response = supabase.table('user_bank_acc') \
+    .select('acc_type, acc_amount') \
+    .eq('user_id', id) \
+    .execute()
+    return response.data
 
 if __name__ == '__main__':
     app.run(debug=True, port=5000, host='0.0.0.0')

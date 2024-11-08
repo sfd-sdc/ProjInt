@@ -6,27 +6,27 @@
 {% block content %}
     <h3>Informação do Utilizador </h3>
     <ul>
-        <li>Nome completo: {{ data.user_fullname }}</li>
-        <li>Morada: {{ data.user_address }}</li>
-        <li>Data de Nascimento: {{ data.user_birthdate }}</li>
-        <li>Email: {{ data.user_email }}</li>
-        <li>Número de Telemóvel: {{ data.user_phone }}</li>
+        <li>Nome completo: {{ data[0].user_fullname }}</li>
+        <li>Morada: {{ data[0].user_address }}</li>
+        <li>Data de Nascimento: {{ data[0].user_birthdate }}</li>
+        <li>Email: {{ data[0].user_email }}</li>
+        <li>Número de Telemóvel: {{ data[0].user_phone }}</li>
     </ul>
 
-    {% for conta in contas %}
-        <h3>Informação da Conta Bancária {{ data.id }}</h3>
+    {% for conta in data[1] %}
+    <h3>Informação da Conta Bancária {{ conta.acc_iban }}</h3>
         <ul>
-            <li>Tipo: {{ data.acc_type }}</li>
+            <li>Tipo: {{ conta.acc_type }}</li>
             <li>
                 <details>
                     <summary>Saldo</summary>
-                    {{ data.acc_amount }}
+                    {{ conta.acc_amount }}
                 </details>
             </li>
         </ul>
     {% endfor %}
 
-    <form action="/createAccount" method="post">
+    <form action="/createAccount", method="post">
         <button type="submit">Criar Conta</button>
     </form>
 
