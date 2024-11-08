@@ -5,7 +5,6 @@ from random import randint
 app = Flask(__name__)
 app.secret_key = 'SupaSecret'
 
-@app.route('/')
 def Home():
     message = 'Welcome to SDC Bank'
     data = {
@@ -43,52 +42,27 @@ def dashboard(id):
         }
         return redirect('../signin')
 
+@app.route('/pay')
+def pay():
+    data = {
+        'title': 'Pagamentos',
+        'page': 'Novo Pagamento',
+        'message': request.args.get('message')
+    }
+    return render_template('payments.html', data=data)
+
+@app.route('/confirm')
+def confirm():
+    data = {
+        'title': 'Pagamentos',
+        'page': 'Confirmar Pagamento',
+        'entity_name': session['entity_name'],
+        'amount': request.args.get('amount'),
+        }
+    return render_template('confirm.html', data=data)
+
 
 #-------------------------------Definir número de utilizador-----------------------------
-def create_user_number():
-    bank_code = "8226"
-    # Gera o número de utilizador
-    user_number = randint(0, 999999)
-    user_final_number = f"{bank_code}{user_number:06}"
-    return user_final_number
-
-def createIban(user_num):
-    randNum = randint(0, 999)
-    iban = f'{user_num}{randNum:03}'
-    # print(iban) 
-    return iban
-
-def insert_user():
-    number = create_user_number()
-    data = {'user_email': request.form['email'],
-            'user_fullname': request.form['fullname'],
-            'user_address': request.form['address'],
-            'user_doc_num': request.form['num'],
-            'user_birthdate': request.form['date'],
-            'user_phone': request.form['phone'],
-            'user_num': number,
-            }
-
-    res = (
-        supabase.table("users")
-        .insert(data)
-        .execute()
-    )
-    return res.data[0]['id']
-
-    # criacao conta bancaria default
-def createBankAcc(id, create_user_number):
-    acc = {
-        'acc_type': 'Conta à ordem',
-        'acc_amount': 0.00,
-        'user_id': id,
-        'acc_iban': createIban(create_user_number),
-    }
-    response = (
-        supabase.table("user_bank_acc")
-        .insert(acc)
-        .execute()
-    )
 # API routes
 @app.route('/login', methods=['POST'])
 def login():
@@ -173,6 +147,64 @@ def createAcc():
         print ("An error occurred:", str(e))
         return redirect('/')
 
+@app.route('/payment', methods=['POST'])
+def payment():
+    id = session['user_id'] 
+
+    # verificar entidade
+    paymentData = getPaymentData()
+    entity = supabase.table('entitys') \
+        .select('name, entity_number') \
+        .eq('entity_number', paymentData['entity']) \
+        .execute()
+
+    session['entity_name'] = entity.data[0]['name']
+    session['entity_number'] = entity.data[0]['entity_number']
+    session['amount'] = paymentData['amount']
+
+    try:
+        if entity.data[0]['entity_number'] == int(paymentData['entity']):
+            # verificar saldo da conta do utilizador
+            accBalance = supabase.table('user_bank_acc') \
+                        .select('acc_amount , acc_type') \
+                        .eq('user_id', id) \
+                        .execute()
+
+
+            for acc in accBalance.data:
+                if acc['acc_type'] == 'Conta à ordem':
+                    if float(acc['acc_amount']) >= float(paymentData['amount']):
+                        session['acc_amount'] = float(acc['acc_amount'])
+                        return redirect('/confirm')
+                    else:
+                        data = {
+                            'balance': 'Saldo Insuficiente'
+                        }
+                    return redirect(url_for('pay', message=data['balance']))
+    except:
+        data = {
+            'entity': 'Entidade não encontrada'
+        }
+        return redirect(url_for('pay', message=data['entity']))
+
+@app.route('/confirmPayment')
+def confirmPayment():
+    data = {
+        'title': 'Pagamentos',
+        'page': 'Confirmar Pagamento',
+        'entity_name': session['entity_name'],
+        'entity_number': session['entity_number'],
+        'amount': session['amount'],
+        }
+
+    newAmount = float(session['acc_amount']) - float(session['amount'])
+
+    updateAcc = supabase.table('user_bank_acc') \
+                .update({'acc_amount': newAmount}) \
+                .eq('user_id', session['user_id']) \
+                .execute()
+
+# ------------------------------------------------------------------------
 def getUser(id):
     response = supabase.table('users') \
     .select('user_fullname, user_birthdate, user_address, user_phone, user_email') \
@@ -186,6 +218,73 @@ def getUserAcc(id):
     .eq('user_id', id) \
     .execute()
     return response.data
+
+def create_user_number():
+    bank_code = "8226"
+    # verificar entidade
+    paymentData = getPaymentData()
+    try:
+        entity = supabase.table('entitys') \
+            .select('name') \
+            .eq('entity_number', paymentData['entity']) \
+            .execute()
+        return redirect('/confirm')
+    except:
+        data = {
+            'title': 'Pagamentos',
+            'page': 'Novo Pagamento',
+            'entity': 'Entidade não encontrada'
+        }
+        return redirect('/pay')
+    # Gera o número de utilizador
+    user_number = randint(0, 999999)
+    user_final_number = f"{bank_code}{user_number:06}"
+    return user_final_number
+
+def createIban(user_num):
+    randNum = randint(0, 999)
+    iban = f'{user_num}{randNum:03}'
+    # print(iban) 
+    return iban
+
+def insert_user():
+    number = create_user_number()
+    data = {'user_email': request.form['email'],
+            'user_fullname': request.form['fullname'],
+            'user_address': request.form['address'],
+            'user_doc_num': request.form['num'],
+            'user_birthdate': request.form['date'],
+            'user_phone': request.form['phone'],
+            'user_num': number,
+            }
+
+    res = (
+        supabase.table("users")
+        .insert(data)
+        .execute()
+    )
+    return res.data[0]['id']
+
+    # criacao conta bancaria default
+def createBankAcc(id, create_user_number):
+    acc = {
+        'acc_type': 'Conta à ordem',
+        'acc_amount': 0.00,
+        'user_id': id,
+        'acc_iban': createIban(create_user_number),
+    }
+    response = (
+        supabase.table("user_bank_acc")
+        .insert(acc)
+        .execute()
+    )
+
+def getPaymentData():
+    paymentData = {
+        'entity': request.form['entity'],
+        'amount': request.form['amount']
+    }
+    return paymentData
 
 if __name__ == '__main__':
     app.run(debug=True, port=5000, host='0.0.0.0')
