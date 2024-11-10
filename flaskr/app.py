@@ -128,10 +128,30 @@ def createUser():
 @app.route('/create_account', methods=['POST'])
 def createAcc():
     iban = createIban(create_user_number())
-    id = session.get('user_id')
-    print(id)
+    id = session['user_id']
+    getAccountType = request.form['account_type']
+
+    accountType = ''
+
+    if getAccountType == 'conta_ordem':
+       accountType = 'Conta à Ordem'
+    elif getAccountType == 'conta_base':
+        accountType = 'Conta Base'
+    elif getAccountType == 'conta_sevicos_minimos':
+        accountType = 'Conta Serviços Mínimos Bancários'
+    elif getAccountType == 'conta_poupanca':
+        accountType = 'Conta Poupança'
+    elif getAccountType == 'conta_ordenado':
+        accountType = 'Conta Ordenado'
+    elif getAccountType == 'conta_universitarios':
+        accountType = 'Conta para Universitários'
+    elif getAccountType == 'conta_empresarial':
+        accountType = 'Conta Bancária Empresarial'
+    elif getAccountType == 'conta_jovem':
+        accountType = 'Conta Jovem (para menores)'
+
     data = {
-        'acc_type': request.form['account_type'],
+        'acc_type': accountType,
         'acc_amount': request.form['account_amount'],
         'user_id': id, 
         'acc_iban': iban, 
@@ -146,7 +166,7 @@ def createAcc():
         return redirect(f'/dashboard/{id}')
     except Exception as e:
         print ("An error occurred:", str(e))
-        return redirect('/')
+        return redirect(f'/dashboard/{id}')
 
 @app.route('/payment', methods=['POST'])
 def payment():
@@ -224,21 +244,6 @@ def getUserAcc(id):
 
 def create_user_number():
     bank_code = "8226"
-    # verificar entidade
-    paymentData = getPaymentData()
-    try:
-        entity = supabase.table('entitys') \
-            .select('name') \
-            .eq('entity_number', paymentData['entity']) \
-            .execute()
-        return redirect('/confirm')
-    except:
-        data = {
-            'title': 'Pagamentos',
-            'page': 'Novo Pagamento',
-            'entity': 'Entidade não encontrada'
-        }
-        return redirect('/pay')
     # Gera o número de utilizador
     user_number = randint(0, 999999)
     user_final_number = f"{bank_code}{user_number:06}"
