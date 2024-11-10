@@ -1,0 +1,14 @@
+{% extends "base.html" %} {% block title %} {{ data.title }} {% endblock %} {% block nav %} {{ data.navTitle }} {% endblock %} {% block content %}
+<p>IBAN: {{data.iban}}</p>
+<p>Valor: {{data.amount}} €</p>
+
+<p>Deseja confirmar o pagamento?</p>
+
+<form action="/tranfer" method="GET">
+    <button type="submit">Cancelar</button>
+</form>
+
+<form action="executeTransfer" method="POST">
+    <button type="submit">Confirmar</button>
+</form>
+{% endblock %}
