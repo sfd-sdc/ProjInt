@@ -254,11 +254,11 @@ def verifyTranfer():
         .eq('acc_iban', transferData['iban'])\
         .execute()
 
-    session['amount'] = transferData.data['amount']
-    session['iban'] = transferData.data['iban']
+    session['amount'] = transferData['amount']
+    session['iban'] = transferData['iban']
 
     try:
-        if int(transferData.data[iban]) == iban.data[0]['acc_iban']:
+        if int(transferData['iban']) == iban.data[0]['acc_iban']:
             accBalance = supabase.table('user_bank_acc')\
                         .select('acc_amount, acc_type')\
                         .eq('user_id', id)\
@@ -281,7 +281,7 @@ def verifyTranfer():
         return redirect(url_for('transfer', message=data['iban']))
 
 @app.route('/executeTransfer', methods=['POST'])
-def executePayment():
+def executeTransfer():
     data = {
         'title': 'Transferências',
         'page': 'Confirmar Transferência',
