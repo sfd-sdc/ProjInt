@@ -51,8 +51,8 @@ def pay():
     }
     return render_template('payments.html', data=data)
 
-@app.route('/confirm')
-def confirm():
+@app.route('/confirmPayment')
+def confirmPayment():
     data = {
         'title': 'Pagamentos',
         'page': 'Confirmar Pagamento',
@@ -61,6 +61,24 @@ def confirm():
         }
     return render_template('confirm_payment.html', data=data)
 
+@app.route('/transfer')
+def transfer():
+    data = {
+        'title': 'Transferências',
+        'page': 'Nova Transferência',
+        'message': request.args.get('message')
+    }
+    return render_template('tranfers.html', data=data)
+
+@app.route('/confirmTransfer')
+def confirmTransfer():
+    data = {
+        'title': 'Transferências',
+        'page': 'Confirmar Transferência',
+        'iban': session['iban'],
+        'amount': session['amount'],
+        }
+    return render_template('confirm_transfer.html', data=data)
 
 #-------------------------------Definir número de utilizador-----------------------------
 # API routes
@@ -196,7 +214,7 @@ def payment():
                 if acc['acc_type'] == 'Conta à ordem':
                     if float(acc['acc_amount']) >= float(paymentData['amount']):
                         session['acc_amount'] = float(acc['acc_amount'])
-                        return redirect('/confirm')
+                        return redirect('/confirmPayment')
                     else:
                         data = {
                             'balance': 'Saldo Insuficiente'
@@ -208,8 +226,8 @@ def payment():
         }
         return redirect(url_for('pay', message=data['entity']))
 
-@app.route('/confirmPayment', methods=['POST'])
-def confirmPayment():
+@app.route('/executePayment', methods=['POST'])
+def executePayment():
     data = {
         'title': 'Pagamentos',
         'page': 'Confirmar Pagamento',
@@ -224,6 +242,72 @@ def confirmPayment():
                 .update({'acc_amount': newAmount}) \
                 .eq('user_id', session['user_id']) \
                 .execute()
+    #TODO: redirecionar para dashboard
+    return redirect(f'dashboard/{session["user_id"]}')
+
+@app.route('/transfer', methods=['POST'])
+def verifyTranfer():
+    id = session['user_id']
+    transferData = getTransferData()
+    iban = supabase.table('user_bank_acc')\
+        .select('acc_iban')\
+        .eq('acc_iban', transferData['iban'])\
+        .execute()
+
+    session['amount'] = transferData.data['amount']
+    session['iban'] = transferData.data['iban']
+
+    try:
+        if int(transferData.data[iban]) == iban.data[0]['acc_iban']:
+            accBalance = supabase.table('user_bank_acc')\
+                        .select('acc_amount, acc_type')\
+                        .eq('user_id', id)\
+                        .execute()
+
+            for acc in accBalance.data:
+                if acc['acc_type'] == 'Conta à ordem':
+                    if float(acc['acc_amount']) >= float(transferData['amount']):
+                        session['acc_amount'] = float(acc['acc_amount'])
+                        return redirect('/confirmTransfer')
+                    else:
+                        data = {
+                            'balance': 'Saldo Insuficiente'
+                        }
+                    return redirect(url_for('transfer', message=data['balance']))
+    except:
+        data = {
+            'iban': 'Iban incorreto'
+        }
+        return redirect(url_for('transfer', message=data['iban']))
+
+@app.route('/executeTransfer', methods=['POST'])
+def executePayment():
+    data = {
+        'title': 'Transferências',
+        'page': 'Confirmar Transferência',
+        'iban': session['iban'],
+        'amount': session['amount'],
+        }
+
+    newAmountOrig = float(session['acc_amount']) - float(session['amount'])
+
+    updateAcc = supabase.table('user_bank_acc') \
+                .update({'acc_amount': newAmountOrig}) \
+                .eq('user_id', session['user_id']) \
+                .execute()
+
+    response = supabase.table('user_bank_acc') \
+        .select('acc_amount') \
+        .eq('acc_iban', session['iban']) \
+        .execute()
+
+    newAmountDest = float(session['acc_amount']) + float(session['amount'])
+
+    updateAcc = supabase.table('user_bank_acc') \
+        .update({'acc_amount': newAmountDest}) \
+        .eq('acc_iban', session['iban']) \
+        .execute()
+
     #TODO: redirecionar para dashboard
     return redirect(f'dashboard/{session["user_id"]}')
 
@@ -293,6 +377,13 @@ def getPaymentData():
         'amount': request.form['amount']
     }
     return paymentData
+
+def getTransferData():
+    transferData = {
+        'iban': request.form['iban'],
+        'amount': request.form['amount']
+    }
+    return transferData
 
 if __name__ == '__main__':
     app.run(debug=True, port=5000, host='0.0.0.0')
