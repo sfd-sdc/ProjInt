@@ -57,7 +57,7 @@ def confirm():
         'title': 'Pagamentos',
         'page': 'Confirmar Pagamento',
         'entity_name': session['entity_name'],
-        'amount': request.args.get('amount'),
+        'amount': session['amount'],
         }
     return render_template('confirm_payment.html', data=data)
 
