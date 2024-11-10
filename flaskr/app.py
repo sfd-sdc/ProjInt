@@ -59,7 +59,7 @@ def confirm():
         'entity_name': session['entity_name'],
         'amount': request.args.get('amount'),
         }
-    return render_template('confirm.html', data=data)
+    return render_template('confirm_payment.html', data=data)
 
 
 #-------------------------------Definir número de utilizador-----------------------------
@@ -101,6 +101,7 @@ def login():
 @app.route('/logout', methods=['GET'])
 def logout():
     response = supabase.auth.sign_out()
+    session.clear()
     return redirect('../signin')
 @app.route('/createUser', methods=['POST'])
 def createUser():
@@ -187,7 +188,7 @@ def payment():
         }
         return redirect(url_for('pay', message=data['entity']))
 
-@app.route('/confirmPayment')
+@app.route('/confirmPayment', methods=['POST'])
 def confirmPayment():
     data = {
         'title': 'Pagamentos',
@@ -203,6 +204,8 @@ def confirmPayment():
                 .update({'acc_amount': newAmount}) \
                 .eq('user_id', session['user_id']) \
                 .execute()
+    #TODO: redirecionar para dashboard
+    return redirect(f'dashboard/{session["user_id"]}')
 
 # ------------------------------------------------------------------------
 def getUser(id):
