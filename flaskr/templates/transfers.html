@@ -1,13 +1,16 @@
-{% extends "base.html" %} {% block title %} {{ data.title }} {% endblock %} {% block nav %} {{ data.page }} {% endblock %} {% block content %}
-<form action="/transfer" method="POST">
-    <label for="iban">Entidade:</label><br />
-    <input type="text" id="iban" name="IBAN" required /><br /><br />
-    <label for="amount">Montante:</label><br />
-    <input type="text" id="amount" name="amount" required /><br /><br />
+{% extends "base.html" %}
+{% block title %} {{ data.title }} {% endblock %}
+{% block nav %} {{ data.page }} {% endblock %}
+{% block content %}
+    <form action="/transfer" method="POST">
+        <label for="iban">Iban:</label><br />
+        <input type="text" id="iban" name="iban" required /><br /><br />
+        <label for="amount">Montante:</label><br />
+        <input type="text" id="amount" name="amount" required /><br /><br />
 
-    <p>{{ data.entity }}</p>
+        <p>{{ data.entity }}</p>
 
-    <input type="submit" value="Avançar" />
-</form>
+        <input type="submit" value="Avançar" />
+    </form>
 
 {% endblock %}

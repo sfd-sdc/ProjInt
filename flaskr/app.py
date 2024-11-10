@@ -68,7 +68,7 @@ def transfer():
         'page': 'Nova Transferência',
         'message': request.args.get('message')
     }
-    return render_template('tranfers.html', data=data)
+    return render_template('transfers.html', data=data)
 
 @app.route('/confirmTransfer')
 def confirmTransfer():
@@ -301,7 +301,7 @@ def executeTransfer():
         .eq('acc_iban', session['iban']) \
         .execute()
 
-    newAmountDest = float(session['acc_amount']) + float(session['amount'])
+    newAmountDest = float(response.data[0]['acc_amount']) + float(session['amount'])
 
     updateAcc = supabase.table('user_bank_acc') \
         .update({'acc_amount': newAmountDest}) \
