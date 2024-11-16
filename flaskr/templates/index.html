@@ -1,13 +1,11 @@
-{% extends "base.html" %}
-
-    {% block title %} {{ data.title }} {% endblock  %}
-
-{% block nav %}
-    <h2>{{ data.navTitle }}</h2>
-{%endblock %}
-
-{% block content %}
-    <div class="content">
-        <h2>{{ data.message }}</h2> 
-    </div>
+{% extends "base.html" %} {% block title %} {{ data.title }} {% endblock %} {% block content %}
+<div class="content">
+    <h2>SDC Bank</h2>
+    <form action="/signin">
+        <input type="submit" value="Entrar" />
+    </form>
+    <form action="/signup">
+        <input type="submit" value="Registar" />
+    </form>
+</div>
 {% endblock %}
