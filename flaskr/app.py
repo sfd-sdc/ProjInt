@@ -321,11 +321,10 @@ def executeTransfer():
 
 GO_APP_URL = 'http://localhost:8080/send-email'
 
-@app.route("/sendAccMovements", methods=['GET'])
+@app.route("/sendAccMovements", methods=['POST'])
 def sendAccMovements():
     #create a pdf with account movements
     data = generatePDF()
-    return render_template('email_template.html', fData=data)
 
     data = {
         "to": request.form["to"],
@@ -428,16 +427,17 @@ def generatePDF():
     # for i in data.data:
     #     f.write(f'{str(i)}\n\n')
     data = supabase.table('transfers_history') \
-        .select('users(user_fullname), receiver_acc_id, amount, date') \
-        .eq('sender_acc_id', '44595e57-d327-4d5c-96e0-ea79211b4142') \
+        .select('users(user_fullname), receiver_acc_id(user_id(user_fullname)), amount, date') \
+        .eq('user_id', '1a8c52f2-423c-46dc-b7f4-93ca663a2316') \
         .execute()
-    fDatatransfers = {'name': data.data[0]['users']['user_fullname'],
-             'receiver_acc': data.data[0]['receiver_acc']['name'],
+
+    fDatatransfers = {'sender_name': data.data[0]['users']['user_fullname'],
+             'receiver_name': data.data[0]['receiver_acc_id']['user_id']['user_fullname'],
              'amount': data.data[0]['amount'],
              'date': data.data[0]['date']}
 
+    print(fDatatransfers)
     fData=[fDatapayments, fDatatransfers]
-
     return fData
 
     f.close()
