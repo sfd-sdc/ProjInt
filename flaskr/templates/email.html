@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <h2>{{data.name}}</h2>
+     <table>
+      <tr>
+        <th>Entidade</th>
+        <th>Valor</th>
+        <th>Data</th>
+      </tr>
+      <tr>
+        <td>{{data.entity}}</td>
+        <td>{{data.amount}}</td>
+        <td>{{data.date}}</td>
+      </tr>
+    </table> 
+{% endblock %}

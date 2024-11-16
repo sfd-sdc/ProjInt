@@ -1,6 +1,8 @@
-from flask import Flask, redirect, render_template, request, url_for, session 
+from flask import Flask, redirect, render_template, request, url_for, session, jsonify
+import requests
 from supabase_client import supabase
 from random import randint
+from fpdf import FPDF
 
 app = Flask(__name__)
 app.secret_key = 'SupaSecret'
@@ -14,6 +16,11 @@ def Home():
         'message': message
     }
     return render_template('index.html', data=data)
+
+@app.route('/testEmail')
+def testEmail():
+    data = generatePDF()
+    return render_template('email.html', data=data)
 
 @app.route('/signup')
 def singup():
@@ -312,6 +319,26 @@ def executeTransfer():
     #TODO: redirecionar para dashboard
     return redirect(f'dashboard/{session["user_id"]}')
 
+GO_APP_URL = 'http://localhost:8080/send-email'
+
+@app.route("/sendAccMovements", methods=['GET'])
+def sendAccMovements():
+    #create a pdf with account movements
+    data = generatePDF()
+    return render_template('email_template.html', fData=data)
+
+    data = {
+        "to": request.form["to"],
+        "subject": request.form["subject"],
+        "html": request.form["content"]
+    }
+    try:
+        response = requests.post(GO_APP_URL, json=data)
+        response.raise_for_status()
+        return jsonify(response.json()), response.status_code
+    except requests.exceptions.RequestException as e:
+        return jsonify({'error': str(e)}), 500
+
 # ------------------------------------------------------------------------
 def getUser(id):
     response = supabase.table('users') \
@@ -385,6 +412,41 @@ def getTransferData():
         'amount': request.form['amount']
     }
     return transferData
+
+def generatePDF():
+    f = open("movimentos.txt", "w")
+
+    data = supabase.table('payments_history') \
+        .select('users(user_fullname), entitys(name), amount, date') \
+        .eq('user_bank_acc_id', '44595e57-d327-4d5c-96e0-ea79211b4142') \
+        .execute()
+    fData = {'name': data.data[0]['users']['user_fullname'],
+             'entity': data.data[0]['entitys']['name'],
+             'amount': data.data[0]['amount'],
+             'date': data.data[0]['date']}
+    return fData
+
+    # for i in data.data:
+    #     f.write(f'{str(i)}\n\n')
+
+    f.close()
+    txt_file = "movimentos.txt"
+    pdf_file = "goEmails/files/movimentos.pdf"
+
+# Criação do objeto PDF
+    pdf = FPDF()
+    pdf.set_auto_page_break(auto=True, margin=15)
+    pdf.add_page()
+    pdf.set_font("Arial", size=12)
+
+# Leitura do arquivo de texto
+    with open(txt_file, 'r', encoding='utf-8') as file:
+        for line in file:
+            pdf.multi_cell(0, 10, line)
+
+# Salvando o arquivo PDF
+    pdf.output(pdf_file)
+    return(f"Arquivo PDF '{pdf_file}' criado com sucesso.")
 
 if __name__ == '__main__':
     app.run(debug=True, port=5000, host='0.0.0.0')
