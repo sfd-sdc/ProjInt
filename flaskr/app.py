@@ -5,6 +5,7 @@ from random import randint
 app = Flask(__name__)
 app.secret_key = 'SupaSecret'
 
+@app.route('/')
 def Home():
     message = 'Welcome to SDC Bank'
     data = {
