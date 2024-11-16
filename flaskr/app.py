@@ -420,14 +420,25 @@ def generatePDF():
         .select('users(user_fullname), entitys(name), amount, date') \
         .eq('user_bank_acc_id', '44595e57-d327-4d5c-96e0-ea79211b4142') \
         .execute()
-    fData = {'name': data.data[0]['users']['user_fullname'],
+    fDatapayments = {'name': data.data[0]['users']['user_fullname'],
              'entity': data.data[0]['entitys']['name'],
              'amount': data.data[0]['amount'],
              'date': data.data[0]['date']}
-    return fData
 
     # for i in data.data:
     #     f.write(f'{str(i)}\n\n')
+    data = supabase.table('transfers_history') \
+        .select('users(user_fullname), receiver_acc_id, amount, date') \
+        .eq('sender_acc_id', '44595e57-d327-4d5c-96e0-ea79211b4142') \
+        .execute()
+    fDatatransfers = {'name': data.data[0]['users']['user_fullname'],
+             'receiver_acc': data.data[0]['receiver_acc']['name'],
+             'amount': data.data[0]['amount'],
+             'date': data.data[0]['date']}
+
+    fData=[fDatapayments, fDatatransfers]
+
+    return fData
 
     f.close()
     txt_file = "movimentos.txt"
