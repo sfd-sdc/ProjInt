@@ -3,6 +3,8 @@ import requests
 from supabase_client import supabase
 from random import randint
 from fpdf import FPDF
+import resend
+import os
 
 app = Flask(__name__)
 app.secret_key = 'SupaSecret'
@@ -181,7 +183,6 @@ def createAcc():
         'user_id': id, 
         'acc_iban': iban, 
     }
-    print(data)
     try:
         response = (
             supabase.table('user_bank_acc')
@@ -235,11 +236,13 @@ def payment():
 
 @app.route('/executePayment', methods=['POST'])
 def executePayment():
+    #TODO: falta fazer o registo do pagamento na base de dados
     data = {
         'title': 'Pagamentos',
         'page': 'Confirmar Pagamento',
         'entity_name': session['entity_name'],
         'entity_number': session['entity_number'],
+        #TODO: falta fazer o registo do pagamento na base de dados
         'amount': session['amount'],
         }
 
@@ -289,6 +292,7 @@ def verifyTranfer():
 
 @app.route('/executeTransfer', methods=['POST'])
 def executeTransfer():
+    #TODO: falta fazer o registo da transferancia na base de dados
     data = {
         'title': 'Transferências',
         'page': 'Confirmar Transferência',
@@ -323,7 +327,7 @@ GO_APP_URL = 'http://localhost:8080/send-email'
 @app.route("/sendAccMovements", methods=['POST'])
 def sendAccMovements():
     #create a pdf with account movements
-    data = generatePDF()
+    generatePDF()
 
     data = {
         "to": request.form["to"],
@@ -331,9 +335,10 @@ def sendAccMovements():
         "html": request.form["content"]
     }
     try:
-        response = requests.post(GO_APP_URL, json=data)
-        response.raise_for_status()
-        return jsonify(response.json()), response.status_code
+        sendEmail()
+        # response = requests.post(GO_APP_URL, json=data)
+        # response.raise_for_status()
+        return jsonify('Email Sent')
     except requests.exceptions.RequestException as e:
         return jsonify({'error': str(e)}), 500
 
@@ -362,7 +367,6 @@ def create_user_number():
 def createIban(user_num):
     randNum = randint(0, 999)
     iban = f'{user_num}{randNum:03}'
-    # print(iban) 
     return iban
 
 def insert_user():
@@ -412,44 +416,50 @@ def getTransferData():
     return transferData
 
 def generatePDF():
-    f = open("movimentos.txt", "w")
+    f = open("files/movimentos.txt", "w")
+
+    f.write("Movimentos\n")
+    f.write("Conta Origem - Conta Destino/Entidade - Valor - Data\n")
+    f.write("------------------------------------------------------------------------------------\n")
+
+    f.close()
 
     data = supabase.table('payments_history') \
         .select('users(user_fullname), entitys(name), amount, date') \
-        .eq('user_bank_acc_id', '44595e57-d327-4d5c-96e0-ea79211b4142') \
+        .eq('user_id', '1a8c52f2-423c-46dc-b7f4-93ca663a2316') \
         .execute()
 
-    fDataPayments = {'name': data.data[0]['users']['user_fullname'],
-             'entity': data.data[0]['entitys']['name'],
-             'paymentAmount': data.data[0]['amount'],
-             'paymentDate': data.data[0]['date']}
+    f = open("files/movimentos.txt", "a")
+
+    for i in range(len(data.data[0]) - 3):
+        fDataPayments = {'name': data.data[i]['users']['user_fullname'],
+             'entity': data.data[i]['entitys']['name'],
+             'paymentAmount': data.data[i]['amount'],
+             'paymentDate': data.data[i]['date']}
+        for key, value in fDataPayments.items():
+            f.write(f"{value}   ")
+        f.write("\n")
 
     data = supabase.table('transfers_history') \
         .select('users(user_fullname), receiver_acc_id(user_id(user_fullname)), amount, date') \
         .eq('user_id', '1a8c52f2-423c-46dc-b7f4-93ca663a2316') \
         .execute()
 
-    fDataTransfers = {'sender_name': data.data[0]['users']['user_fullname'],
-             'receiver_name': data.data[0]['receiver_acc_id']['user_id']['user_fullname'],
-             'transferAmount': data.data[0]['amount'],
-             'transferDate': data.data[0]['date']}
-
-    data = [fDataTransfers, fDataPayments]
-    print(data)
-
-    #TODO: Need to change this 
-    f.write("Movimentos\n")
-    f.write("Conta Origem - Conta Destino/Entidade - Valor - Data\n")
-    f.write("------------------------------------------------------------------------------------\n")
-    for dict in data:
-        f.write('\n')
-        for key, value in dict.items():
-            print(f'{key}: {value}')
+    for i in range(len(data.data[0]) - 1):
+        fDataTransfers = {'sender_name': data.data[i]['users']['user_fullname'],
+                 'receiver_name': data.data[i]['receiver_acc_id']['user_id']['user_fullname'],
+                 'transferAmount': data.data[i]['amount'],
+                 'transferDate': data.data[i]['date']}
+        for key, value in fDataTransfers.items():
             f.write(f"{value}   ")
+        f.write("\n")
+
 
     f.close()
-    txt_file = "movimentos.txt"
-    pdf_file = "goEmails/files/movimentos.pdf"
+
+    #TODO: Need to change this 
+    txt_file = "files/movimentos.txt"
+    pdf_file = "files/movimentos.pdf"
 
 # Criação do objeto PDF
     pdf = FPDF()
@@ -465,6 +475,30 @@ def generatePDF():
 # Salvando o arquivo PDF
     pdf.output(pdf_file)
     return(f"Arquivo PDF '{pdf_file}' criado com sucesso.")
+
+def sendEmail():
+    resend.api_key = "re_9cJvnsx4_NYH1LWM7VW4hgdWGcpzYB5cg"
+
+    f: bytes = open(
+        #Change path acording to your os. This is for linux
+        os.path.join(os.path.dirname(__file__), "../files/movimentos.pdf"), "rb"
+    ).read()
+
+    attachment: resend.Attachment = {"content": list(f), "filename": "movimentos.pdf"}
+
+    params: resend.Emails.SendParams = {
+        "from": "pedro.santo@pedrosanto.pt",
+        "to": "pedro.bb.90@gmail.com",
+        "subject": "SDC Bank",
+        "html": "<strong>SDC Bank</strong>\n \
+      <p>Aqui está o estrato das suas contas</p> \
+      <p>Obrigado por usar o SDC Bank</p>",
+        "attachments": [attachment],
+
+    }
+
+    email: resend.Email = resend.Emails.send(params)
+    return email
 
 if __name__ == '__main__':
     app.run(debug=True, port=5000, host='0.0.0.0')
