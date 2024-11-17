@@ -36,7 +36,6 @@ def createNewAcc():
 
 @app.route('/dashboard/<id>', methods=['GET'])
 def dashboard(id):
-    global idData
     try:
         user_acc = getUserAcc(id)
         idData = getUser(id)
@@ -419,26 +418,34 @@ def generatePDF():
         .select('users(user_fullname), entitys(name), amount, date') \
         .eq('user_bank_acc_id', '44595e57-d327-4d5c-96e0-ea79211b4142') \
         .execute()
-    fDatapayments = {'name': data.data[0]['users']['user_fullname'],
-             'entity': data.data[0]['entitys']['name'],
-             'amount': data.data[0]['amount'],
-             'date': data.data[0]['date']}
 
-    # for i in data.data:
-    #     f.write(f'{str(i)}\n\n')
+    fDataPayments = {'name': data.data[0]['users']['user_fullname'],
+             'entity': data.data[0]['entitys']['name'],
+             'paymentAmount': data.data[0]['amount'],
+             'paymentDate': data.data[0]['date']}
+
     data = supabase.table('transfers_history') \
         .select('users(user_fullname), receiver_acc_id(user_id(user_fullname)), amount, date') \
         .eq('user_id', '1a8c52f2-423c-46dc-b7f4-93ca663a2316') \
         .execute()
 
-    fDatatransfers = {'sender_name': data.data[0]['users']['user_fullname'],
+    fDataTransfers = {'sender_name': data.data[0]['users']['user_fullname'],
              'receiver_name': data.data[0]['receiver_acc_id']['user_id']['user_fullname'],
-             'amount': data.data[0]['amount'],
-             'date': data.data[0]['date']}
+             'transferAmount': data.data[0]['amount'],
+             'transferDate': data.data[0]['date']}
 
-    print(fDatatransfers)
-    fData=[fDatapayments, fDatatransfers]
-    return fData
+    data = [fDataTransfers, fDataPayments]
+    print(data)
+
+    #TODO: Need to change this 
+    f.write("Movimentos\n")
+    f.write("Conta Origem - Conta Destino/Entidade - Valor - Data\n")
+    f.write("------------------------------------------------------------------------------------\n")
+    for dict in data:
+        f.write('\n')
+        for key, value in dict.items():
+            print(f'{key}: {value}')
+            f.write(f"{value}   ")
 
     f.close()
     txt_file = "movimentos.txt"
