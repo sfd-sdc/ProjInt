@@ -32,9 +32,13 @@ In Project API KEYS, copy anon/public key and paste it in the KEY field in.env f
 ## Usage
 
 In the root of the project run:
-
+#Linux
 ```bash
 python3 flaskr/app.py
+```
+#Windows
+```bash
+python flaskr\app.py
 ```
 
 Go to your browser and navigate to: https://localhost:5000
