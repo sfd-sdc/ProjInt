@@ -1,7 +1,7 @@
 {% extends "base.html" %}
-{% block title %} {{ data.title }} {% endblock %}
-{% block nav %} {{ data.navTitle }} {% endblock %}
+{% block title %} Criar Conta {% endblock %}
 {% block content %}
+
     <form action="/create_account" method="POST">
         <label for="account_type">Tipo de Conta:</label><br />
         <select id="account_type" name="account_type">
@@ -20,6 +20,9 @@
 
         <input type="submit" value="Criar conta" />
         <p>{{ data.message }}</p>
+    </form>
+    <form action="/login" method="POST">
+        <button type="submit">Voltar</button>
     </form>
 
 {% endblock %}

@@ -1,6 +1,5 @@
 {% extends "base.html" %}
 {% block title %} {{ data.title }} {% endblock %}
-{% block nav %} {{ data.page }} {% endblock %}
 {% block content %}
     <form action="/transfer" method="POST">
         <label for="iban">Iban:</label><br />
@@ -8,9 +7,11 @@
         <label for="amount">Montante:</label><br />
         <input type="text" id="amount" name="amount" required /><br /><br />
 
-        <p>{{ data.entity }}</p>
+        <!--<p>{{ data.entity }}</p>-->
 
         <input type="submit" value="Avançar" />
+    </form><form action="/login" method="POST">
+        <button type="submit">Voltar</button>
     </form>
 
 {% endblock %}

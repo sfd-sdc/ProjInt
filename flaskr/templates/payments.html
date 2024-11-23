@@ -1,7 +1,6 @@
 {% extends "base.html" %} 
 
 {% block title %} {{ data.title }} {% endblock  %}
-{% block nav %} {{ data.page }} {% endblock %}
 
 {% block content %}
     <form action="/payment" method="POST">
@@ -13,6 +12,9 @@
         <p>{{ data.entity }}</p>
 
         <input type="submit" value="Avançar" />
+    </form>
+    <form action="/login" method="POST">
+        <button type="submit">Voltar</button>
     </form>
 
 {% endblock %}

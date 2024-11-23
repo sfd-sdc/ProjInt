@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 
-{% block title %} {{ data.user_fullname }} {% endblock  %}
-{% block nav %} {{ data.user_fullname }} {% endblock %}
+{% block title %} Dashboard {% endblock  %}
+{% block nav %} Bem-vindo, {{ data[0].user_fullname }} {% endblock %}
 
 {% block content %}
     <h3>Informação do Utilizador </h3>
@@ -30,15 +30,15 @@
         <button type="submit">Criar Conta</button>
     </form>
 
-    <form action="/logout" method="get">
-        <button type="submit">Sair</button>
-    </form>
-
     <form action="/pay" method="get">
         <button type="submit">Pagamento de seviços</button>
     </form>
 
     <form action="/transfer" method="get">
         <button type="submit">Transferências</button>
+    </form>
+
+    <form action="/logout" method="get">
+        <button type="submit">Sair</button>
     </form>
 {% endblock %}
