@@ -213,7 +213,7 @@ def payment():
         if entity.data[0]['entity_number'] == int(paymentData['entity']):
             # verificar saldo da conta do utilizador
             accBalance = supabase.table('user_bank_acc') \
-                        .select('acc_amount , acc_type') \
+                        .select('id', 'acc_amount , acc_type') \
                         .eq('user_id', id) \
                         .execute()
 
@@ -222,6 +222,7 @@ def payment():
                 if acc['acc_type'] == 'Conta à ordem':
                     if float(acc['acc_amount']) >= float(paymentData['amount']):
                         session['acc_amount'] = float(acc['acc_amount'])
+                        session['acc_id'] = acc['id']
                         return redirect('/confirmPayment')
                     else:
                         data = {
@@ -250,7 +251,7 @@ def executePayment():
 
     updateAcc = supabase.table('user_bank_acc') \
                 .update({'acc_amount': newAmount}) \
-                .eq('user_id', session['user_id']) \
+                .eq('id', session['acc_id']) \
                 .execute()
     #TODO: redirecionar para dashboard
     return redirect(f'dashboard/{session["user_id"]}')
@@ -270,7 +271,7 @@ def verifyTranfer():
     try:
         if int(transferData['iban']) == iban.data[0]['acc_iban']:
             accBalance = supabase.table('user_bank_acc')\
-                        .select('acc_amount, acc_type')\
+                        .select('id', 'acc_amount, acc_type')\
                         .eq('user_id', id)\
                         .execute()
 
@@ -278,6 +279,7 @@ def verifyTranfer():
                 if acc['acc_type'] == 'Conta à ordem':
                     if float(acc['acc_amount']) >= float(transferData['amount']):
                         session['acc_amount'] = float(acc['acc_amount'])
+                        session['acc_id'] = acc['id']
                         return redirect('/confirmTransfer')
                     else:
                         data = {
@@ -304,7 +306,7 @@ def executeTransfer():
 
     updateAcc = supabase.table('user_bank_acc') \
                 .update({'acc_amount': newAmountOrig}) \
-                .eq('user_id', session['user_id']) \
+                .eq('id', session['acc_id']) \
                 .execute()
 
     response = supabase.table('user_bank_acc') \
