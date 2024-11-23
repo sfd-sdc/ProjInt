@@ -1,6 +1,10 @@
-from flask import Flask, redirect, render_template, request, url_for, session 
+from flask import Flask, redirect, render_template, request, url_for, session, jsonify
+import requests
 from supabase_client import supabase
 from random import randint
+from fpdf import FPDF
+import resend
+import os
 
 app = Flask(__name__)
 app.secret_key = 'SupaSecret'
@@ -14,6 +18,11 @@ def Home():
         'message': message
     }
     return render_template('index.html', data=data)
+
+@app.route('/testEmail')
+def testEmail():
+    data = generatePDF()
+    return render_template('email.html', data=data)
 
 @app.route('/signup')
 def singup():
@@ -29,7 +38,6 @@ def createNewAcc():
 
 @app.route('/dashboard/<id>', methods=['GET'])
 def dashboard(id):
-    global idData
     try:
         user_acc = getUserAcc(id)
         idData = getUser(id)
@@ -175,7 +183,6 @@ def createAcc():
         'user_id': id, 
         'acc_iban': iban, 
     }
-    print(data)
     try:
         response = (
             supabase.table('user_bank_acc')
@@ -229,11 +236,13 @@ def payment():
 
 @app.route('/executePayment', methods=['POST'])
 def executePayment():
+    #TODO: falta fazer o registo do pagamento na base de dados
     data = {
         'title': 'Pagamentos',
         'page': 'Confirmar Pagamento',
         'entity_name': session['entity_name'],
         'entity_number': session['entity_number'],
+        #TODO: falta fazer o registo do pagamento na base de dados
         'amount': session['amount'],
         }
 
@@ -283,6 +292,7 @@ def verifyTranfer():
 
 @app.route('/executeTransfer', methods=['POST'])
 def executeTransfer():
+    #TODO: falta fazer o registo da transferancia na base de dados
     data = {
         'title': 'Transferências',
         'page': 'Confirmar Transferência',
@@ -312,6 +322,26 @@ def executeTransfer():
     #TODO: redirecionar para dashboard
     return redirect(f'dashboard/{session["user_id"]}')
 
+GO_APP_URL = 'http://localhost:8080/send-email'
+
+@app.route("/sendAccMovements", methods=['POST'])
+def sendAccMovements():
+    #create a pdf with account movements
+    generatePDF()
+
+    data = {
+        "to": request.form["to"],
+        "subject": request.form["subject"],
+        "html": request.form["content"]
+    }
+    try:
+        sendEmail()
+        # response = requests.post(GO_APP_URL, json=data)
+        # response.raise_for_status()
+        return jsonify('Email Sent')
+    except requests.exceptions.RequestException as e:
+        return jsonify({'error': str(e)}), 500
+
 # ------------------------------------------------------------------------
 def getUser(id):
     response = supabase.table('users') \
@@ -337,7 +367,6 @@ def create_user_number():
 def createIban(user_num):
     randNum = randint(0, 999)
     iban = f'{user_num}{randNum:03}'
-    # print(iban) 
     return iban
 
 def insert_user():
@@ -385,6 +414,91 @@ def getTransferData():
         'amount': request.form['amount']
     }
     return transferData
+
+def generatePDF():
+    f = open("files/movimentos.txt", "w")
+
+    f.write("Movimentos\n")
+    f.write("Conta Origem - Conta Destino/Entidade - Valor - Data\n")
+    f.write("------------------------------------------------------------------------------------\n")
+
+    f.close()
+
+    data = supabase.table('payments_history') \
+        .select('users(user_fullname), entitys(name), amount, date') \
+        .eq('user_id', '1a8c52f2-423c-46dc-b7f4-93ca663a2316') \
+        .execute()
+
+    f = open("files/movimentos.txt", "a")
+
+    for i in range(len(data.data[0]) - 3):
+        fDataPayments = {'name': data.data[i]['users']['user_fullname'],
+             'entity': data.data[i]['entitys']['name'],
+             'paymentAmount': data.data[i]['amount'],
+             'paymentDate': data.data[i]['date']}
+        for key, value in fDataPayments.items():
+            f.write(f"{value}   ")
+        f.write("\n")
+
+    data = supabase.table('transfers_history') \
+        .select('users(user_fullname), receiver_acc_id(user_id(user_fullname)), amount, date') \
+        .eq('user_id', '1a8c52f2-423c-46dc-b7f4-93ca663a2316') \
+        .execute()
+
+    for i in range(len(data.data[0]) - 1):
+        fDataTransfers = {'sender_name': data.data[i]['users']['user_fullname'],
+                 'receiver_name': data.data[i]['receiver_acc_id']['user_id']['user_fullname'],
+                 'transferAmount': data.data[i]['amount'],
+                 'transferDate': data.data[i]['date']}
+        for key, value in fDataTransfers.items():
+            f.write(f"{value}   ")
+        f.write("\n")
+
+
+    f.close()
+
+    #TODO: Need to change this 
+    txt_file = "files/movimentos.txt"
+    pdf_file = "files/movimentos.pdf"
+
+# Criação do objeto PDF
+    pdf = FPDF()
+    pdf.set_auto_page_break(auto=True, margin=15)
+    pdf.add_page()
+    pdf.set_font("Arial", size=12)
+
+# Leitura do arquivo de texto
+    with open(txt_file, 'r', encoding='utf-8') as file:
+        for line in file:
+            pdf.multi_cell(0, 10, line)
+
+# Salvando o arquivo PDF
+    pdf.output(pdf_file)
+    return(f"Arquivo PDF '{pdf_file}' criado com sucesso.")
+
+def sendEmail():
+    resend.api_key = "re_9cJvnsx4_NYH1LWM7VW4hgdWGcpzYB5cg"
+
+    f: bytes = open(
+        #Change path acording to your os. This is for linux
+        os.path.join(os.path.dirname(__file__), "../files/movimentos.pdf"), "rb"
+    ).read()
+
+    attachment: resend.Attachment = {"content": list(f), "filename": "movimentos.pdf"}
+
+    params: resend.Emails.SendParams = {
+        "from": "pedro.santo@pedrosanto.pt",
+        "to": "pedro.bb.90@gmail.com",
+        "subject": "SDC Bank",
+        "html": "<strong>SDC Bank</strong>\n \
+      <p>Aqui está o estrato das suas contas</p> \
+      <p>Obrigado por usar o SDC Bank</p>",
+        "attachments": [attachment],
+
+    }
+
+    email: resend.Email = resend.Emails.send(params)
+    return email
 
 if __name__ == '__main__':
     app.run(debug=True, port=5000, host='0.0.0.0')
