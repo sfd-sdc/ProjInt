@@ -32,11 +32,11 @@ In Project API KEYS, copy anon/public key and paste it in the KEY field in.env f
 ## Usage
 
 In the root of the project run:
-#Linux
+# Linux
 ```bash
 python3 flaskr/app.py
 ```
-#Windows
+# Windows
 ```bash
 python flaskr\app.py
 ```
