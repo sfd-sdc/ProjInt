@@ -14,7 +14,7 @@ cd ProjInt
 Use the package manager [pip](https://pip.pypa.io/en/stable/) to install requirements
 
 ```bash
-pip install requirements.txt
+pip install -r requirements.txt
 ```
 
 Create a file named .env to put your supabase credentials
