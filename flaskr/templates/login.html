@@ -1,10 +1,10 @@
 {% extends "base.html" %} {% block title %} {{ data.title }} {% endblock %} {% block nav %} {{ data.navTitle }} {% endblock %} {% block content %}
 <form action="/login" method="POST">
-    <label for="email">Email:</label><br />
-    <input type="email" id="email" name="email" required /><br /><br />
+    <input class="formfield" placeholder="Email" type="email" id="email" name="email" required />
+    <label class="formlabel email" for="email">Email</label>
 
-    <label for="password">Palavra passe:</label><br />
-    <input type="password" id="password" name="password" required /><br /><br />
+    <input class="formfield" placeholder="Password" type="password" id="password" name="password" required />
+    <label class="formlabel password" for="password">Palavra Passe</label>
 
     <input type="submit" value="Login" />
 
