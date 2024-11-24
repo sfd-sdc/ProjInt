@@ -1,18 +1,13 @@
-{% extends "base.html" %}
+{% extends "base.html" %} {% block title %} {{ data.title }} {% endblock %} {% block nav %} {{ data.navTitle }} {% endblock %} {% block content %}
+<form action="/login" method="POST">
+    <label for="email">Email:</label><br />
+    <input type="email" id="email" name="email" required /><br /><br />
 
-{% block title %} {{ data.title }} {% endblock  %}
-{% block nav %} {{ data.navTitle }} {% endblock %}
+    <label for="password">Palavra passe:</label><br />
+    <input type="password" id="password" name="password" required /><br /><br />
 
-{% block content %}
-    <form action="/login" method="POST">
-        <label for="email">Email:</label><br />
-        <input type="email" id="email" name="email" required /><br /><br />
-
-        <label for="password">Palavra passe:</label><br />
-        <input type="password" id="password" name="password" required /><br /><br />
-
-        <input type="submit" value="Login" />
-        <p>{{ data.message }}</p>
-    </form>
+    <input type="submit" value="Login" />
+    <input type="submit" value="Voltar" />
+    <p>{{ data.message }}</p>
+</form>
 {% endblock %}
-
