@@ -360,11 +360,21 @@ def getUserAcc(id):
     return response.data
 
 def create_user_number():
-    bank_code = "8226"
-    # Gera o número de utilizador
-    user_number = randint(0, 999999)
-    user_final_number = f"{bank_code}{user_number:06}"
-    return user_final_number
+    def generate_number():
+        bank_code = "8226"
+        user_number = randint(0, 999999)
+        return f"{bank_code}{user_number:06}"
+    def is_unique_user_number(user_number):
+        # Verifica se o número já existe na tabela
+        response = supabase.table('users').select('user_num').eq('user_num', user_number).execute()
+        return len(response.data) == 0
+    def generate_unique_number():
+        number = generate_number()
+        if is_unique_user_number(number):
+            return number
+        return generate_unique_number()  # Chamada recursiva até encontrar um número único
+
+    return generate_unique_number()
 
 def createIban(user_num):
     randNum = randint(0, 999)
