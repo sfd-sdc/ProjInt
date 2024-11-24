@@ -1,10 +1,10 @@
 from flask import Flask, redirect, render_template, request, url_for, session, jsonify
 import requests
 from supabase_client import supabase
-from random import randint
 from fpdf import FPDF
 import resend
 import os
+from users import *
 
 app = Flask(__name__)
 app.secret_key = 'SupaSecret'
@@ -32,7 +32,7 @@ def singup():
 def signin():
     return render_template('login.html', data='Login')
 
-@app.route('/createAccount', methods=['POST'])
+@app.route('/createAccount', methods=['GET'])
 def createNewAcc():
     return render_template('create_account.html', data='data')
 
@@ -157,19 +157,12 @@ def createAcc():
     iban = createIban(create_user_number())
     id = session['user_id']
     getAccountType = request.form['account_type']
+    value = request.form['account_amount']
 
     accountType = ''
 
-    if getAccountType == 'conta_ordem':
-       accountType = 'Conta à Ordem'
-    elif getAccountType == 'conta_base':
-        accountType = 'Conta Base'
-    elif getAccountType == 'conta_sevicos_minimos':
-        accountType = 'Conta Serviços Mínimos Bancários'
-    elif getAccountType == 'conta_poupanca':
+    if getAccountType == 'conta_poupanca':
         accountType = 'Conta Poupança'
-    elif getAccountType == 'conta_ordenado':
-        accountType = 'Conta Ordenado'
     elif getAccountType == 'conta_universitarios':
         accountType = 'Conta para Universitários'
     elif getAccountType == 'conta_empresarial':
@@ -177,9 +170,27 @@ def createAcc():
     elif getAccountType == 'conta_jovem':
         accountType = 'Conta Jovem (para menores)'
 
+    accountAmount = (
+        supabase.table('user_bank_acc')
+        .select('acc_amount, user_id(id)')
+        .eq('acc_type', 'Conta à Ordem')
+        .execute()
+    )
+
+    if value == '':
+        value = 0
+
+    if float(accountAmount.data[0]["acc_amount"]) < float(value):
+        data = {
+            'message' : "Saldo da conta a ordem insuficiente para abertura de nova conta"
+        }
+        #TODO : ISTO TA TUDO FODIDO
+        return redirect(url_for('../createAccount', data = data))
+
+
     data = {
         'acc_type': accountType,
-        'acc_amount': request.form['account_amount'],
+        'acc_amount': value,
         'user_id': id, 
         'acc_iban': iban, 
     }
@@ -345,74 +356,6 @@ def sendAccMovements():
         return jsonify({'error': str(e)}), 500
 
 # ------------------------------------------------------------------------
-def getUser(id):
-    response = supabase.table('users') \
-    .select('user_fullname, user_birthdate, user_address, user_phone, user_email') \
-    .eq('id', id) \
-    .execute()
-    return response.data[0]
-
-def getUserAcc(id):
-    response = supabase.table('user_bank_acc') \
-    .select('acc_type, acc_amount') \
-    .eq('user_id', id) \
-    .execute()
-    return response.data
-
-def create_user_number():
-    def generate_number():
-        bank_code = "8226"
-        user_number = randint(0, 999999)
-        return f"{bank_code}{user_number:06}"
-    def is_unique_user_number(user_number):
-        # Verifica se o número já existe na tabela
-        response = supabase.table('users').select('user_num').eq('user_num', user_number).execute()
-        return len(response.data) == 0
-    def generate_unique_number():
-        number = generate_number()
-        if is_unique_user_number(number):
-            return number
-        return generate_unique_number()  # Chamada recursiva até encontrar um número único
-
-    return generate_unique_number()
-
-def createIban(user_num):
-    randNum = randint(0, 999)
-    iban = f'{user_num}{randNum:03}'
-    return iban
-
-def insert_user():
-    number = create_user_number()
-    data = {'user_email': request.form['email'],
-            'user_fullname': request.form['fullname'],
-            'user_address': request.form['address'],
-            'user_doc_num': request.form['num'],
-            'user_birthdate': request.form['date'],
-            'user_phone': request.form['phone'],
-            'user_num': number,
-            }
-
-    res = (
-        supabase.table("users")
-        .insert(data)
-        .execute()
-    )
-    return res.data[0]['id']
-
-    # criacao conta bancaria default
-def createBankAcc(id, create_user_number):
-    acc = {
-        'acc_type': 'Conta à ordem',
-        'acc_amount': 0.00,
-        'user_id': id,
-        'acc_iban': createIban(create_user_number),
-    }
-    response = (
-        supabase.table("user_bank_acc")
-        .insert(acc)
-        .execute()
-    )
-
 def getPaymentData():
     paymentData = {
         'entity': request.form['entity'],
