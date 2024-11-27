@@ -3,6 +3,8 @@
     {% block title %} {{ data.title }} {% endblock %}
     {% block nav %} {{ data.navTitle }} {% endblock %}
     {% block content %}
+
+<div class="content">
     <form action="/create_account" method="POST">
         <label for="account_type">Tipo de Conta:</label><br />
         <select id="account_type" name="account_type" required>
@@ -10,18 +12,19 @@
             <option value="conta_poupanca">Conta poupança</option>
             <option value="conta_universitarios">Conta para universitários</option>
             <option value="conta_empresarial">Conta bancária empresarial</option>
-            <option value="conta_jovem">Conta jovem (para menores)</option></select>
-        <br /><br />
-    <label for="account_amount">Valor inicial:</label><br />
-    <input type="number" id="account_amount" name="account_amount" placeholder="Introduza o valor inicial" /><br /><br />
+            <option value="conta_jovem">Conta jovem (para menores)</option>
+        </select><br /><br />
+        <label for="account_amount">Valor inicial:</label><br />
+        <input type="number" id="account_amount" name="account_amount" placeholder="Introduza o valor inicial" /><br /><br />
 
-    <p>{{ data.message }}</p>
+        <p>{{ data.message }}</p>
 
-    <input type="submit" value="Criar conta" />
-</form>
-<form action="/login" method="POST">
-    <input class="button-voltar" type="submit" value="Voltar" />
-</form>
+        <input class="button-submit" type="submit" value="Criar conta" />
+    </form>
+    <form action="/login" method="POST">
+        <input class="button-voltar" type="submit" value="Voltar" />
+    </form>
+</div>
 
     {% with messages = get_flashed_messages() %}
     {% if messages %}
