@@ -11,22 +11,6 @@
             <option value="conta_empresarial">Conta bancária empresarial</option>
             <option value="conta_jovem">Conta jovem (para menores)</option></select>
         <br /><br />
-{% extends "base.html" %} {% block title %} Criar Conta {% endblock %} {% block content %}
-
-<form action="/create_account" method="POST">
-    <label for="account_type">Tipo de Conta:</label><br />
-    <select id="account_type" name="account_type">
-        <option value="conta_ordem">Conta à ordem</option>
-        <option value="conta_base">Conta base</option>
-        <option value="conta_servicos_minimos">Conta de Serviços Mínimos Bancários</option>
-        <option value="conta_poupanca">Conta poupança</option>
-        <option value="conta_ordenado">Conta ordenado</option>
-        <option value="conta_universitarios">Conta para universitários</option>
-        <option value="conta_empresarial">Conta bancária empresarial</option>
-        <option value="conta_jovem">Conta jovem (para menores)</option>
-    </select>
-    <br /><br />
-
     <label for="account_amount">Valor inicial:</label><br />
     <input type="number" id="account_amount" name="account_amount" placeholder="Introduza o valor inicial" /><br /><br />
 
@@ -48,4 +32,4 @@
     {% endif %}
     {% endwith %}
 
-    {% endblock %}
+{% endblock %}
