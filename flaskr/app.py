@@ -370,6 +370,9 @@ def sendAccMovements():
     except requests.exceptions.RequestException as e:
         return jsonify({'error': str(e)}), 500
 
+@app.route("/voltar", methods=['POST'])
+def voltar():
+    return redirect(f'dashboard/{session["user_id"]}')
 # ------------------------------------------------------------------------
 def getPaymentData():
     paymentData = {
@@ -464,7 +467,6 @@ def sendEmail():
       <p>Aqui está o estrato das suas contas</p> \
       <p>Obrigado por usar o SDC Bank</p>",
         "attachments": [attachment],
-
     }
 
     email: resend.Email = resend.Emails.send(params)
