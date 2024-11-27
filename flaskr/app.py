@@ -1,4 +1,4 @@
-from flask import Flask, redirect, render_template, request, url_for, session, jsonify
+from flask import Flask, redirect, render_template, request, url_for, session, jsonify, flash
 import requests
 from supabase_client import supabase
 from fpdf import FPDF
@@ -32,7 +32,7 @@ def singup():
 def signin():
     return render_template('login.html', data='Login')
 
-@app.route('/createAccount', methods=['GET'])
+@app.route('/createAccount', methods=['POST'])
 def createNewAcc():
     return render_template('create_account.html', data='data')
 
@@ -129,7 +129,7 @@ def login():
 def logout():
     response = supabase.auth.sign_out()
     session.clear()
-    return redirect('../signin')
+    return redirect('../')
 @app.route('/createUser', methods=['POST'])
 def createUser():
     # data = request.get_json()
@@ -181,12 +181,24 @@ def createAcc():
         value = 0
 
     if float(accountAmount.data[0]["acc_amount"]) < float(value):
-        data = {
-            'message' : "Saldo da conta a ordem insuficiente para abertura de nova conta"
-        }
+        message = "Saldo da conta a ordem insuficiente para abertura de nova conta"
         #TODO : ISTO TA TUDO FODIDO
-        return redirect(url_for('../createAccount', data = data))
+        
+        flash(message)
+        return render_template('create_account.html', data='data')
 
+
+
+    data = {
+        'acc_amount' : float(accountAmount.data[0]["acc_amount"]) - float(value)
+    }
+
+    response = (supabase.table('user_bank_acc') \
+        .update(data)
+        .eq('acc_type', 'Conta à Ordem')
+        .eq('user_id', id)
+        .execute())
+                
 
     data = {
         'acc_type': accountType,

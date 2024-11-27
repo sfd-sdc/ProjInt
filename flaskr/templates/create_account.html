@@ -1,7 +1,8 @@
 {% extends "base.html" %}
-{% block title %} {{ data.title }} {% endblock %}
-{% block nav %} {{ data.navTitle }} {% endblock %}
-{% block content %}
+
+    {% block title %} {{ data.title }} {% endblock %}
+    {% block nav %} {{ data.navTitle }} {% endblock %}
+    {% block content %}
     <form action="/create_account" method="POST">
         <label for="account_type">Tipo de Conta:</label><br />
         <select id="account_type" name="account_type">
@@ -18,4 +19,14 @@
         <p>{{ data.message }}</p>
     </form>
 
-{% endblock %}
+    {% with messages = get_flashed_messages() %}
+    {% if messages %}
+    <ul class=flashes>
+        {% for message in messages %}
+        <li>{{ message }}</li>
+        {% endfor %}
+    </ul>
+    {% endif %}
+    {% endwith %}
+
+    {% endblock %}
