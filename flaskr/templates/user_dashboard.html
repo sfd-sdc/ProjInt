@@ -3,27 +3,29 @@ content %}
 
 <ul>
     <h3>Informação do Utilizador</h3>
-    <li>Nome completo: {{ data[0].user_fullname }}</li>
-    <li>Morada: {{ data[0].user_address }}</li>
-    <li>Data de Nascimento: {{ data[0].user_birthdate }}</li>
-    <li>Email: {{ data[0].user_email }}</li>
-    <li>Número de Telemóvel: {{ data[0].user_phone }}</li>
+    <div class="grid">
+        <li>Nome completo: {{ data[0].user_fullname }}</li>
+        <li>Morada: {{ data[0].user_address }}</li>
+        <li>Data de Nascimento: {{ data[0].user_birthdate }}</li>
+        <li>Email: {{ data[0].user_email }}</li>
+        <li>Número de Telemóvel: {{ data[0].user_phone }}</li>
+    </div>
 </ul>
 
+<div class="flex">
 {% for conta in data[1] %}
-
-<ul>
-    <h3>Informação da Conta Bancária {{ conta.acc_iban }}</h3>
-    <li>Tipo: {{ conta.acc_type }}</li>
-    <li>
-        <details>
-            <summary>Saldo</summary>
-            {{ conta.acc_amount }}€
-        </details>
-    </li>
-</ul>
+    <ul class="bank-account">
+        <h3>Informação da Conta Bancária {{ conta.acc_iban }}</h3>
+        <li>Tipo: {{ conta.acc_type }}</li>
+        <li>
+            <details>
+                <summary>Saldo</summary>
+                {{ conta.acc_amount }}€
+            </details>
+        </li>
+    </ul>
 {% endfor %}
-
+</div>
 
 <div class="buttons-container">
     <form action="/createAccount" method="post">

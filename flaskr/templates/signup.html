@@ -29,10 +29,10 @@
         required
         oninput="this.setCustomValidity(this.value != document.getElementById('password').value ? 'As senhas não coincidem.' : '')" /><br /><br />
 
-    <input class="button-signup" type="submit" value="Submeter" />
+    <input type="submit" value="Submeter" />
 </form>
 
 <form action="/" method="get">
-    <input type="submit" value="Voltar" />
+    <input class="button-voltar" type="submit" value="Voltar" />
 </form>
 {% endblock %}

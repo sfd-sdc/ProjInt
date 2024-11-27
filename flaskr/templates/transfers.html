@@ -1,6 +1,6 @@
 {% extends "base.html" %} {% block title %} {{ data.title }} {% endblock %} {% block content %}
 <form action="/transfer" method="POST">
-    <label for="iban">Iban:</label><br />
+    <label for="iban">IBAN:</label><br />
     <input type="text" id="iban" name="iban" required /><br /><br />
     <label for="amount">Montante:</label><br />
     <input type="text" id="amount" name="amount" required /><br /><br />
@@ -10,7 +10,7 @@
     <input type="submit" value="Avançar" />
 </form>
 <form action="/login" method="POST">
-    <input class="button-transfer" type="submit" value="Voltar" />
+    <input class="button-voltar" type="submit" value="Voltar" />
 </form>
 
 {% endblock %}
