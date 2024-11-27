@@ -293,6 +293,7 @@ input[type="submit"] {
 input[type="submit"]:hover,
 input[type="submit"]:focus,
 input[type="submit"]:active {
+    cursor: pointer;
     background: #008dd5;
     color: #fff;
 }
@@ -436,8 +437,8 @@ ul {
 }
 
 .grid {
-      display: grid;
-      grid-template-columns: auto auto auto;
+    display: grid;
+    grid-template-columns: auto auto auto;
 }
 
 .flex {
