@@ -280,7 +280,7 @@ def executePayment():
     return redirect(f'dashboard/{session["user_id"]}')
 
 @app.route('/transfer', methods=['POST'])
-def verifyTranfer():
+def verifyTransfer():
     id = session['user_id']
     transferData = getTransferData()
     iban = supabase.table('user_bank_acc')\
@@ -299,16 +299,19 @@ def verifyTranfer():
                         .execute()
 
             for acc in accBalance.data:
-                if acc['acc_type'] == 'Conta à ordem':
+                if acc['acc_type'] == 'Conta à Ordem':
                     if float(acc['acc_amount']) >= float(transferData['amount']):
+                        # guarda os valores nos dados da sessão
                         session['acc_amount'] = float(acc['acc_amount'])
                         session['acc_id'] = acc['id']
+                        print(session['acc_id'])
+                        print(session['acc_amount'])
                         return redirect('/confirmTransfer')
                     else:
                         data = {
                             'balance': 'Saldo Insuficiente'
                         }
-                    return redirect(url_for('transfer', message=data['balance']))
+                        return redirect(url_for('transfer', message=data['balance']))
     except:
         data = {
             'iban': 'Iban incorreto'
