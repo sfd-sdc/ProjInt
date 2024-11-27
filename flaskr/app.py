@@ -5,6 +5,7 @@ from fpdf import FPDF
 import resend
 import os
 from users import *
+from movements import *
 
 app = Flask(__name__)
 app.secret_key = 'SupaSecret'
@@ -374,20 +375,6 @@ def sendAccMovements():
 def voltar():
     return redirect(f'dashboard/{session["user_id"]}')
 # ------------------------------------------------------------------------
-def getPaymentData():
-    paymentData = {
-        'entity': request.form['entity'],
-        'amount': request.form['amount']
-    }
-    return paymentData
-
-def getTransferData():
-    transferData = {
-        'iban': request.form['iban'],
-        'amount': request.form['amount']
-    }
-    return transferData
-
 def generatePDF():
     f = open("files/movimentos.txt", "w")
 
