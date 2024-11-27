@@ -1,6 +1,7 @@
 from random import randint
 from supabase_client import supabase
 from flask import request
+
 def getUser(id):
     response = supabase.table('users') \
     .select('user_fullname, user_birthdate, user_address, user_phone, user_email') \

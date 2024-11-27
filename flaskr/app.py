@@ -5,6 +5,7 @@ from fpdf import FPDF
 import resend
 import os
 from users import *
+from genPdf import *
 from movements import *
 
 app = Flask(__name__)
@@ -20,7 +21,7 @@ def Home():
     }
     return render_template('index.html', data=data)
 
-@app.route('/testEmail')
+@app.route('/sendEmail')
 def testEmail():
     data = generatePDF()
     return render_template('email.html', data=data)
@@ -375,6 +376,7 @@ def sendAccMovements():
 def voltar():
     return redirect(f'dashboard/{session["user_id"]}')
 # ------------------------------------------------------------------------
+
 def generatePDF():
     f = open("files/movimentos.txt", "w")
 
