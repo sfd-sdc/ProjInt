@@ -1,44 +1,47 @@
-{% extends "base.html" %}
+{% extends "base.html" %} {% block title %} Dashboard {% endblock %} {% block nav %} Bem-vindo, {{ data[0].user_fullname }} {% endblock %} {% block
+content %}
 
-{% block title %} {{ data.user_fullname }} {% endblock  %}
-{% block nav %} {{ data.user_fullname }} {% endblock %}
-
-{% block content %}
-    <h3>Informação do Utilizador </h3>
-    <ul>
+<ul>
+    <h3>Informação do Utilizador</h3>
+    <div class="grid">
         <li>Nome completo: {{ data[0].user_fullname }}</li>
         <li>Morada: {{ data[0].user_address }}</li>
         <li>Data de Nascimento: {{ data[0].user_birthdate }}</li>
         <li>Email: {{ data[0].user_email }}</li>
         <li>Número de Telemóvel: {{ data[0].user_phone }}</li>
+    </div>
+</ul>
+
+<div class="flex">
+{% for conta in data[1] %}
+    <ul class="bank-account">
+        <h3>Informação da Conta Bancária {{ conta.acc_iban }}</h3>
+        <li>Tipo: {{ conta.acc_type }}</li>
+        <li>
+            <details>
+                <summary>Saldo</summary>
+                {{ conta.acc_amount }}€
+            </details>
+        </li>
     </ul>
+{% endfor %}
+</div>
 
-    {% for conta in data[1] %}
-    <h3>Informação da Conta Bancária {{ conta.acc_iban }}</h3>
-        <ul>
-            <li>Tipo: {{ conta.acc_type }}</li>
-            <li>
-                <details>
-                    <summary>Saldo</summary>
-                    {{ conta.acc_amount }}
-                </details>
-            </li>
-        </ul>
-    {% endfor %}
-
-    <form action="/createAccount", method="post">
-        <button type="submit">Criar Conta</button>
-    </form>
-
-    <form action="/logout" method="get">
-        <button type="submit">Sair</button>
+<div class="buttons-container">
+    <form action="/createAccount" method="post">
+        <input class="button-dashboard" type="submit" value="Criar Conta" />
     </form>
 
     <form action="/pay" method="get">
-        <button type="submit">Pagamento de seviços</button>
+        <input class="button-dashboard" type="submit" value="Pagamento de seviços" />
     </form>
 
     <form action="/transfer" method="get">
-        <button type="submit">Transferências</button>
+        <input class="button-dashboard" type="submit" value="Transferências" />
     </form>
+
+    <form action="/logout" method="get">
+        <input class="button-dashboard" type="submit" value="Sair" />
+    </form>
+</div>
 {% endblock %}

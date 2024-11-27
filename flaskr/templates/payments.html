@@ -1,18 +1,16 @@
-{% extends "base.html" %} 
+{% extends "base.html" %} {% block title %} {{ data.title }} {% endblock %} {% block content %}
+<form action="/payment" method="POST">
+    <label for="entity">Entidade:</label><br />
+    <input type="text" id="entity" name="entity" required /><br /><br />
+    <label for="amount">Montante:</label><br />
+    <input type="text" id="amount" name="amount" required /><br /><br />
 
-{% block title %} {{ data.title }} {% endblock  %}
-{% block nav %} {{ data.page }} {% endblock %}
+    <p>{{ data.entity }}</p>
 
-{% block content %}
-    <form action="/payment" method="POST">
-        <label for="entity">Entidade:</label><br />
-        <input type="text" id="entity" name="entity" required /><br /><br />
-        <label for="amount">Montante:</label><br />
-        <input type="text" id="amount" name="amount" required /><br /><br />
-
-        <p>{{ data.entity }}</p>
-
-        <input type="submit" value="Avançar" />
-    </form>
+    <input type="submit" value="Avançar" />
+</form>
+<form action="/login" method="POST">
+    <input class="button-voltar" type="submit" value="Voltar" />
+</form>
 
 {% endblock %}
