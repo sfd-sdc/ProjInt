@@ -83,6 +83,32 @@ hr {
     width: 700px;
 }
 
+.user-form {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+}
+
+.form-row {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+}
+
+.column {
+    display: flex;
+    flex-direction: column;
+    margin-left: 100px;
+}
+
+.form-actions {
+    grid-column: span 2;
+    text-align: center;
+}
+
+#date {
+    margin-top: 15px;
+}
+
 h1 {
     color: #008dd5;
     font-size: 2em;
