@@ -39,11 +39,12 @@ body {
     display: flex;
     justify-content: center;
     flex-wrap: wrap;
+    padding-top: 20px;
 }
 
 .button-submit {
-    display: flex;
-    justify-content: center;
+    display: block;
+    margin: 10px auto;
 }
 
 .button-voltar {
