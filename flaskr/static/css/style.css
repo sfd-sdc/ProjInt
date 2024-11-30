@@ -56,6 +56,10 @@ body {
     margin-right: 10px;
 }
 
+.button-movimentos {
+    font-size: 10px;
+}
+
 /* Style the header */
 
 .nav-bar {
@@ -472,6 +476,12 @@ ul {
     display: flex;
     flex-wrap: wrap;
     gap: 5px;
+}
+
+.inline {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
 }
 
 li {
