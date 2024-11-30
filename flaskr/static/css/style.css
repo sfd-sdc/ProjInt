@@ -512,4 +512,35 @@ details > summary {
     .bank-account {
         width: 100%;
     }
+
+    .content {
+        width: 100%;
+    }
+
+    .user-form {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .column {
+        margin-left: auto;
+    }
+
+    .form-row {
+        flex-direction: column;
+        align-items: center;
+        gap: 0;
+    }
+
+    .form-actions {
+        grid-column: auto;
+    }
+
+    #date {
+        margin-top: 5px;
+    }
+
+    .button-submit {
+        margin-top: 20px;
+    }
 }
