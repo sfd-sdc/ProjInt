@@ -59,8 +59,8 @@ def insert_user():
     # criacao conta bancaria default
 def createBankAcc(id, create_user_number):
     acc = {
-        'acc_type': 'Conta à ordem',
-        'acc_amount': 0.00,
+        'acc_type': 'Conta à Ordem',
+        'acc_amount': 250.00,
         'user_id': id,
         'acc_iban': createIban(create_user_number),
     }
