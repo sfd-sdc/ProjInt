@@ -1,16 +1,16 @@
-{% extends "base.html" %}
-{% block title %} {{ data.title }} {% endblock %}
-{% block content %}
-<p>IBAN: {{data.iban}}</p>
-<p>Valor: {{data.amount}} €</p>
+{% extends "base.html" %} {% block title %} {{ data.title }} {% endblock %} {% block content %}
+<div class="content">
+    <p>IBAN: {{data.iban}}</p>
+    <p>Valor: {{data.amount}}€</p>
 
-<p>Deseja confirmar o pagamento?</p>
+    <p>Deseja confirmar o pagamento?</p>
 
-<form action="executeTransfer" method="POST">
-    <button type="submit">Confirmar</button>
-</form>
+    <form action="executeTransfer" method="POST">
+        <input class="button-submit" type="submit" value="Confirmar" />
+    </form>
 
-<form action="/tranfer" method="GET">
-    <button type="submit">Cancelar</button>
-</form>
+    <form action="/transfer" method="GET">
+        <input type="submit" value="Cancelar" />
+    </form>
+</div>
 {% endblock %}

@@ -18,10 +18,15 @@ content %}
         <h3 id=>Informação da Conta Bancária {{ conta.acc_iban }}</h3>
         <li>Tipo: {{ conta.acc_type }}</li>
         <li>
-            <details>
-                <summary>Saldo</summary>
-                {{ conta.acc_amount }}€
-            </details>
+            <div class="inline">
+                <details>
+                    <summary>Saldo</summary>
+                    {{ conta.acc_amount }}€
+                </details>
+                <form action="/sendAccMovements" method="post">
+                    <input class="button-movimentos" type="submit" value="Movimentos" />
+                </form>
+            </div>
         </li>
     </ul>
 {% endfor %}
