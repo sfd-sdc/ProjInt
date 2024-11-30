@@ -15,7 +15,7 @@ content %}
 <div class="flex">
 {% for conta in data[1] %}
     <ul class="bank-account">
-        <h3>Informação da Conta Bancária {{ conta.acc_iban }}</h3>
+        <h3 id=>Informação da Conta Bancária {{ conta.acc_iban }}</h3>
         <li>Tipo: {{ conta.acc_type }}</li>
         <li>
             <div class="inline">
@@ -24,6 +24,7 @@ content %}
                     {{ conta.acc_amount }}€
                 </details>
                 <form action="/sendAccMovements" method="post">
+                    <input type="hidden" name="acc_iban" value="{{ conta.acc_iban }}">
                     <input class="button-movimentos" type="submit" value="Movimentos" />
                 </form>
             </div>

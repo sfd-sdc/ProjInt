@@ -1,7 +1,8 @@
 from supabase_client import supabase
 from fpdf import FPDF
 
-def generatePDF():
+def generatePDF(iban, id):
+    userIban = int(iban)
     f = open("files/movimentos.txt", "w")
 
     f.write("Movimentos\n")
@@ -12,12 +13,12 @@ def generatePDF():
 
     data = supabase.table('payments_history') \
         .select('users(user_fullname), entitys(name), amount, date') \
-        .eq('user_id', '1a8c52f2-423c-46dc-b7f4-93ca663a2316') \
+        .eq('user_id', id) \
         .execute()
 
     f = open("files/movimentos.txt", "a")
 
-    for i in range(len(data.data[0]) - 3):
+    for i in range(len(data.data[0])):
         fDataPayments = {'name': data.data[i]['users']['user_fullname'],
              'entity': data.data[i]['entitys']['name'],
              'paymentAmount': data.data[i]['amount'],
@@ -28,7 +29,7 @@ def generatePDF():
 
     data = supabase.table('transfers_history') \
         .select('users(user_fullname), receiver_acc_id(user_id(user_fullname)), amount, date') \
-        .eq('user_id', '1a8c52f2-423c-46dc-b7f4-93ca663a2316') \
+        .eq('user_bank_acc(acc_iban)', userIban) \
         .execute()
 
     for i in range(len(data.data[0]) - 1):
