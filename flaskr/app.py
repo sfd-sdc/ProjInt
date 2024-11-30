@@ -225,6 +225,7 @@ def payment():
 
     # verificar entidade
     paymentData = getPaymentData()
+    
     entity = supabase.table('entitys') \
         .select('name, entity_number') \
         .eq('entity_number', paymentData['entity']) \
@@ -235,7 +236,7 @@ def payment():
     session['amount'] = paymentData['amount']
 
     try:
-        if entity.data[0]['entity_number'] == int(paymentData['entity']):
+        if int(entity.data[0]['entity_number']) == int(paymentData['entity']):
             # verificar saldo da conta do utilizador
             accBalance = supabase.table('user_bank_acc') \
                         .select('id', 'acc_amount , acc_type') \
@@ -244,7 +245,7 @@ def payment():
 
 
             for acc in accBalance.data:
-                if acc['acc_type'] == 'Conta à ordem':
+                if acc['acc_type'] == 'Conta à Ordem':
                     if float(acc['acc_amount']) >= float(paymentData['amount']):
                         session['acc_amount'] = float(acc['acc_amount'])
                         session['acc_id'] = acc['id']
@@ -253,7 +254,7 @@ def payment():
                         data = {
                             'balance': 'Saldo Insuficiente'
                         }
-                    return redirect(url_for('pay', message=data['balance']))
+                        return redirect(url_for('pay', message=data['balance']))
     except:
         data = {
             'entity': 'Entidade não encontrada'
@@ -268,7 +269,6 @@ def executePayment():
         'page': 'Confirmar Pagamento',
         'entity_name': session['entity_name'],
         'entity_number': session['entity_number'],
-        #TODO: falta fazer o registo do pagamento na base de dados
         'amount': session['amount'],
         }
 
@@ -354,11 +354,12 @@ def executeTransfer():
 
 @app.route("/sendAccMovements", methods=['POST'])
 def sendAccMovements():
-    #create a pdf with account movements
-    generatePDF()
 
     #TODO: grab email to send email
-    accIban = ''
+    accIban = request.form['acc_iban']
+
+    #create a pdf with account movements
+    generatePDF(accIban, session['user_id'])
     data = {
         "to": session['email'],
         "subject": accIban,

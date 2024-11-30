@@ -24,6 +24,7 @@ content %}
                     {{ conta.acc_amount }}€
                 </details>
                 <form action="/sendAccMovements" method="post">
+                    <input type="hidden" name="acc_iban" value="{{ conta.acc_iban }}">
                     <input class="button-movimentos" type="submit" value="Movimentos" />
                 </form>
             </div>

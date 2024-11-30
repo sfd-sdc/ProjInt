@@ -1,13 +1,24 @@
 from random import randint
 from supabase_client import supabase
 from flask import request
+from datetime import datetime
 
 def getUser(id):
     response = supabase.table('users') \
     .select('user_fullname, user_birthdate, user_address, user_phone, user_email') \
     .eq('id', id) \
     .execute()
-    return response.data[0]
+
+    date = datetime.strptime(response.data[0]['user_birthdate'], '%Y-%m-%d')
+
+    data = {
+        'user_fullname': response.data[0]['user_fullname'],
+        'user_birthdate': date.strftime('%d/%m/%Y'),
+        'user_address': response.data[0]['user_address'],
+        'user_phone': response.data[0]['user_phone'],
+        'user_email': response.data[0]['user_email']
+    }
+    return data
 
 def getUserAcc(id):
     response = supabase.table('user_bank_acc') \
@@ -48,6 +59,7 @@ def insert_user():
             'user_phone': request.form['phone'],
             'user_num': number,
             }
+    print(data)
 
     res = (
         supabase.table("users")
