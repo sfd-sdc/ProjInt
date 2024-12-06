@@ -18,7 +18,7 @@ def generatePDF(iban, id):
 
     f = open("files/movimentos.txt", "a")
 
-    for i in range(len(data.data[0])):
+    for i in range(len(data.data) - 1):
         fDataPayments = {'name': data.data[i]['users']['user_fullname'],
              'entity': data.data[i]['entitys']['name'],
              'paymentAmount': data.data[i]['amount'],
@@ -29,10 +29,11 @@ def generatePDF(iban, id):
 
     data = supabase.table('transfers_history') \
         .select('users(user_fullname), receiver_acc_id(user_id(user_fullname)), amount, date') \
-        .eq('user_bank_acc(acc_iban)', userIban) \
+        .eq('sender_acc_id', id) \
+        .eq('receiver_acc_id', id) \
         .execute()
 
-    for i in range(len(data.data[0]) - 1):
+    for i in range(len(data.data) - 1):
         fDataTransfers = {'sender_name': data.data[i]['users']['user_fullname'],
                  'receiver_name': data.data[i]['receiver_acc_id']['user_id']['user_fullname'],
                  'transferAmount': data.data[i]['amount'],

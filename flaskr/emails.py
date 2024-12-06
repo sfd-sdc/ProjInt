@@ -16,7 +16,7 @@ def sendEmail(data):
 
     params: resend.Emails.SendParams = {
         "from": "pedro.santo@pedrosanto.pt",
-        "to":data.to,
+        "to":data['to'],
         "subject": "SDC Bank",
         "html": "<strong>SDC Bank</strong>\n \
       <p>Aqui está o estrato das suas contas</p> \

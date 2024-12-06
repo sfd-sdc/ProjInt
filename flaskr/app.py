@@ -1,7 +1,6 @@
 from flask import Flask, redirect, render_template, request, url_for, session, jsonify, flash
 import requests
 from supabase_client import supabase
-from fpdf import FPDF
 
 from emails import sendEmail
 from users import *
@@ -23,7 +22,7 @@ def Home():
 
 @app.route('/sendEmail')
 def testEmail():
-    data = generatePDF()
+    data = generatePDF(session['user_id'], session['user_iban'])
     return render_template('email.html', data=data)
 
 @app.route('/signup')
