@@ -10,6 +10,8 @@ from movements import *
 app = Flask(__name__)
 app.secret_key = 'SupaSecret'
 
+
+# definição de rotas de view(frontend)
 @app.route('/')
 def Home():
     message = 'Welcome to SDC Bank'
@@ -89,19 +91,26 @@ def confirmTransfer():
 def SendEmail():
     return render_template('confirm_email.html', data='Email Enviado')
 
-# API routes
+# API routes(backend)
 @app.route('/login', methods=['POST'])
 def login():
+    # limpa os dados de sessao
+    session.clear()
     try:
+        # vai buscar os dados que foram introduzidos no forma do frontend
         email = request.form["email"]
         password = request.form["password"]
+        #guarda o email nos dados da sessao
         session['email'] = email
 
+        # faz login do utilizador com os metodos do supabase
         res = supabase.auth.sign_in_with_password({
             'email': email,
             'password': password,
         })
-
+        
+        # verifica se o login foi bem sucedido e guarda o id numa variavel 
+        # para redirecionar para dashboard do utilizador
         if res.session:
             response = supabase.table('users') \
             .select('id') \
@@ -127,14 +136,16 @@ def login():
 
 @app.route('/logout', methods=['GET'])
 def logout():
+    #logout com os metodos do supabase
     response = supabase.auth.sign_out()
+    # limpa os dados da sessao
     session.clear()
     return redirect('../')
+
 @app.route('/createUser', methods=['POST'])
 def createUser():
-    # data = request.get_json()
 
-    # Extract email and password from the data
+    # vai buscar os dados do form de registo para fazer o registo no supabase
     email = request.form["email"]
     password = request.form["password"]
 
@@ -142,6 +153,7 @@ def createUser():
         'email': email,
         'password': password,
     })
+
     try:
         userId = insert_user()
         userNumber = create_user_number()
@@ -149,7 +161,6 @@ def createUser():
     except Exception as e:
         print ("An error occurred:", str(e))
 
-    #TODO: construct a page with information to user go to email for confirmation
     return render_template('index.html', data='HomePage')
 
 @app.route('/create_account', methods=['POST'])
@@ -195,8 +206,7 @@ def createAcc():
 
     response = (supabase.table('user_bank_acc') \
         .update(data)
-        .eq('acc_type', 'Conta à Ordem')
-        .eq('user_id', id)
+        .match({'user_id': id, 'acc_type': 'Conta à Ordem'})
         .execute())
                 
 
