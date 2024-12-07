@@ -20,11 +20,6 @@ def Home():
     }
     return render_template('index.html', data=data)
 
-@app.route('/sendEmail')
-def testEmail():
-    data = generatePDF(session['user_id'], session['user_iban'])
-    return render_template('email.html', data=data)
-
 @app.route('/signup')
 def singup():
     return render_template('signup.html', data='Novo Utilizador')
@@ -89,6 +84,10 @@ def confirmTransfer():
         'amount': session['amount'],
         }
     return render_template('confirm_transfer.html', data=data)
+
+@app.route('/sendEmail')
+def SendEmail():
+    return render_template('confirm_email.html', data='Email Enviado')
 
 # API routes
 @app.route('/login', methods=['POST'])
@@ -398,8 +397,7 @@ def sendAccMovements():
     }
     try:
         sendEmail(data)
-        return redirect(f'dashboard/{session["user_id"]}')
-        return jsonify('Email Sent')
+        return redirect('/sendEmail')
 
     except requests.exceptions.RequestException as e:
         return jsonify({'error': str(e)}), 500
