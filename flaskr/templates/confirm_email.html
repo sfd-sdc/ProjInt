@@ -1,0 +1,9 @@
+{% extends "base.html" %} {% block title %} {{ data.title }} {% endblock %} {% block content %}
+<div class="content">
+    <p>Email enviado com sucesso!</p>
+
+    <form action="/voltar" method="POST">
+        <input class="button-voltar" type="submit" value="Voltar" />
+    </form>
+</div>
+{% endblock %}
