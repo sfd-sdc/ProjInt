@@ -391,7 +391,7 @@ def sendAccMovements():
     accIban = request.form['acc_iban']
 
     #create a pdf with account movements
-    generatePDF(accIban, session['user_id'])
+    generatePDF(accIban)
     data = {
         "to": session['email'],
         "subject": accIban,
