@@ -1,4 +1,5 @@
 from flask import request
+
 def getPaymentData():
     paymentData = {
         'entity': request.form['entity'],

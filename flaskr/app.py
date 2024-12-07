@@ -365,6 +365,7 @@ def sendAccMovements():
     }
     try:
         sendEmail(data)
+        return redirect(f'dashboard/{session["user_id"]}')
         return jsonify('Email Sent')
 
     except requests.exceptions.RequestException as e:
