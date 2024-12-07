@@ -226,12 +226,13 @@ def payment():
     paymentData = getPaymentData()
     
     entity = supabase.table('entitys') \
-        .select('name, entity_number') \
+        .select('name, entity_number, id') \
         .eq('entity_number', paymentData['entity']) \
         .execute()
 
     session['entity_name'] = entity.data[0]['name']
     session['entity_number'] = entity.data[0]['entity_number']
+    session['entity_id'] = entity.data[0]['id']
     session['amount'] = paymentData['amount']
 
     try:
@@ -273,10 +274,21 @@ def executePayment():
 
     newAmount = float(session['acc_amount']) - float(session['amount'])
 
-    updateAcc = supabase.table('user_bank_acc') \
+    supabase.table('user_bank_acc') \
                 .update({'acc_amount': newAmount}) \
                 .eq('id', session['acc_id']) \
                 .execute()
+
+    supabase.table('payments_history') \
+        .insert({
+            'user_bank_acc_id': session['acc_id'],
+            'user_id': session['user_id'],
+            'entity_id': session['entity_id'],
+            'amount': session['amount'],
+            'date': datetime.now().isoformat(),
+            })\
+        .execute()
+
     #TODO: redirecionar para dashboard
     return redirect(f'dashboard/{session["user_id"]}')
 
@@ -295,7 +307,7 @@ def verifyTransfer():
     try:
         if int(transferData['iban']) == iban.data[0]['acc_iban']:
             accBalance = supabase.table('user_bank_acc')\
-                        .select('id', 'acc_amount, acc_type')\
+                        .select('id', 'acc_amount, acc_type, acc_iban')\
                         .eq('user_id', id)\
                         .execute()
 
@@ -304,6 +316,7 @@ def verifyTransfer():
                     if float(acc['acc_amount']) >= float(transferData['amount']):
                         # guarda os valores nos dados da sessão
                         session['acc_amount'] = float(acc['acc_amount'])
+                        session['sender_iban'] = float(acc['acc_iban'])
                         session['acc_id'] = acc['id']
                         print(session['acc_id'])
                         print(session['acc_amount'])
@@ -331,7 +344,7 @@ def executeTransfer():
 
     newAmountOrig = float(session['acc_amount']) - float(session['amount'])
 
-    updateAcc = supabase.table('user_bank_acc') \
+    supabase.table('user_bank_acc') \
                 .update({'acc_amount': newAmountOrig}) \
                 .eq('id', session['acc_id']) \
                 .execute()
@@ -343,10 +356,30 @@ def executeTransfer():
 
     newAmountDest = float(response.data[0]['acc_amount']) + float(session['amount'])
 
-    updateAcc = supabase.table('user_bank_acc') \
+    supabase.table('user_bank_acc') \
         .update({'acc_amount': newAmountDest}) \
         .eq('acc_iban', session['iban']) \
         .execute()
+
+    sender_id = supabase.table('user_bank_acc') \
+        .select('id')\
+        .eq('acc_iban', session['sender_iban'])\
+        .execute()
+
+    receiver_id = supabase.table('user_bank_acc') \
+        .select('id') \
+        .eq('acc_iban', session['iban']) \
+        .execute()
+
+    supabase.table('transfers_history')\
+        .insert({
+            'amount': session['amount'],
+            'date': datetime.now().isoformat(),
+            'sender_acc_id': sender_id.data[0]['id'],
+            'receiver_acc_id': receiver_id.data[0]['id'],
+            'user_id': session['user_id'],
+    })\
+    .execute()
 
     #TODO: redirecionar para dashboard
     return redirect(f'dashboard/{session["user_id"]}')
