@@ -1,47 +1,58 @@
 from supabase_client import supabase
 from fpdf import FPDF
 
-def generatePDF(iban, id):
+def generatePDF(iban):
     userIban = int(iban)
     f = open("files/movimentos.txt", "w")
 
     f.write("Movimentos\n")
-    f.write("Conta Origem - Conta Destino/Entidade - Valor - Data\n")
+    f.write("Origem/Destino - Valor - Data\n")
     f.write("------------------------------------------------------------------------------------\n")
 
-    f.close()
+    id = (supabase.table('user_bank_acc') 
+          .select('id')
+          .eq('acc_iban', iban)
+          .execute()
+          )
 
     data = supabase.table('payments_history') \
-        .select('users(user_fullname), entitys(name), amount, date') \
-        .eq('user_id', id) \
+        .select('entitys(name), amount, date') \
+        .eq('user_bank_acc_id', id.data[0]['id']) \
         .execute()
 
-    f = open("files/movimentos.txt", "a")
+    for payment in data.data:
+        payment_details = {
+            "Entidade": payment['entitys']['name'],
+            "Valor": payment['amount'],
+            "Data": payment['date']
+        }
+        f.write(f"{payment_details['Entidade']}     -{payment_details['Valor']}EUR     {payment_details['Data']}\n")
 
-    for i in range(len(data.data) - 1):
-        fDataPayments = {'name': data.data[i]['users']['user_fullname'],
-             'entity': data.data[i]['entitys']['name'],
-             'paymentAmount': data.data[i]['amount'],
-             'paymentDate': data.data[i]['date']}
-        for key, value in fDataPayments.items():
-            f.write(f"{value}   ")
-        f.write("\n")
-
-    data = supabase.table('transfers_history') \
-        .select('users(user_fullname), receiver_acc_id(user_id(user_fullname)), amount, date') \
-        .eq('sender_acc_id', id) \
-        .eq('receiver_acc_id', id) \
+    sender_data = supabase.table('transfers_history') \
+        .select('receiver_acc_id(acc_iban), amount, date') \
+        .eq('sender_acc_id', id.data[0]['id']) \
         .execute()
 
-    for i in range(len(data.data) - 1):
-        fDataTransfers = {'sender_name': data.data[i]['users']['user_fullname'],
-                 'receiver_name': data.data[i]['receiver_acc_id']['user_id']['user_fullname'],
-                 'transferAmount': data.data[i]['amount'],
-                 'transferDate': data.data[i]['date']}
-        for key, value in fDataTransfers.items():
-            f.write(f"{value}   ")
-        f.write("\n")
+    for transfer in sender_data.data:
+        transfer_details = {
+            "Nome": transfer['receiver_acc_id']['acc_iban'],
+            "Valor":transfer['amount'],
+            "Data": transfer['date']
+        }
+        f.write(f"{transfer_details['Nome']}     -{transfer_details['Valor']}EUR     {transfer_details['Data']}\n")
 
+    receiver_data = supabase.table('transfers_history') \
+        .select('receiver_acc_id(acc_iban), amount, date') \
+        .eq('receiver_acc_id', id.data[0]['id']) \
+        .execute()
+
+    for transfer in receiver_data.data:
+        transfer_details = {
+            "Nome": transfer['receiver_acc_id']['acc_iban'],
+            "Valor":transfer['amount'],
+            "Data": transfer['date']
+        }
+        f.write(f"{transfer_details['Nome']}     +{transfer_details['Valor']}EUR     {transfer_details['Data']}\n")
 
     f.close()
 

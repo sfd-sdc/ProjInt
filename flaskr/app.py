@@ -10,6 +10,8 @@ from movements import *
 app = Flask(__name__)
 app.secret_key = 'SupaSecret'
 
+
+# definição de rotas de view(frontend)
 @app.route('/')
 def Home():
     message = 'Welcome to SDC Bank'
@@ -19,11 +21,6 @@ def Home():
         'message': message
     }
     return render_template('index.html', data=data)
-
-@app.route('/sendEmail')
-def testEmail():
-    data = generatePDF(session['user_id'], session['user_iban'])
-    return render_template('email.html', data=data)
 
 @app.route('/signup')
 def singup():
@@ -90,19 +87,30 @@ def confirmTransfer():
         }
     return render_template('confirm_transfer.html', data=data)
 
-# API routes
+@app.route('/sendEmail')
+def SendEmail():
+    return render_template('confirm_email.html', data='Email Enviado')
+
+# API routes(backend)
 @app.route('/login', methods=['POST'])
 def login():
+    # limpa os dados de sessao
+    session.clear()
     try:
+        # vai buscar os dados que foram introduzidos no forma do frontend
         email = request.form["email"]
         password = request.form["password"]
+        #guarda o email nos dados da sessao
         session['email'] = email
 
+        # faz login do utilizador com os metodos do supabase
         res = supabase.auth.sign_in_with_password({
             'email': email,
             'password': password,
         })
-
+        
+        # verifica se o login foi bem sucedido e guarda o id numa variavel 
+        # para redirecionar para dashboard do utilizador
         if res.session:
             response = supabase.table('users') \
             .select('id') \
@@ -128,14 +136,16 @@ def login():
 
 @app.route('/logout', methods=['GET'])
 def logout():
+    #logout com os metodos do supabase
     response = supabase.auth.sign_out()
+    # limpa os dados da sessao
     session.clear()
     return redirect('../')
+
 @app.route('/createUser', methods=['POST'])
 def createUser():
-    # data = request.get_json()
 
-    # Extract email and password from the data
+    # vai buscar os dados do form de registo para fazer o registo no supabase
     email = request.form["email"]
     password = request.form["password"]
 
@@ -143,6 +153,7 @@ def createUser():
         'email': email,
         'password': password,
     })
+
     try:
         userId = insert_user()
         userNumber = create_user_number()
@@ -150,7 +161,6 @@ def createUser():
     except Exception as e:
         print ("An error occurred:", str(e))
 
-    #TODO: construct a page with information to user go to email for confirmation
     return render_template('index.html', data='HomePage')
 
 @app.route('/create_account', methods=['POST'])
@@ -173,10 +183,12 @@ def createAcc():
 
     accountAmount = (
         supabase.table('user_bank_acc')
-        .select('acc_amount, user_id(id)')
+        .select('acc_amount')
         .eq('acc_type', 'Conta à Ordem')
+        .eq('user_id', id)
         .execute()
     )
+    print(accountAmount)
 
     if value == '':
         value = 0
@@ -196,8 +208,7 @@ def createAcc():
 
     response = (supabase.table('user_bank_acc') \
         .update(data)
-        .eq('acc_type', 'Conta à Ordem')
-        .eq('user_id', id)
+        .match({'user_id': id, 'acc_type': 'Conta à Ordem'})
         .execute())
                 
 
@@ -226,12 +237,13 @@ def payment():
     paymentData = getPaymentData()
     
     entity = supabase.table('entitys') \
-        .select('name, entity_number') \
+        .select('name, entity_number, id') \
         .eq('entity_number', paymentData['entity']) \
         .execute()
 
     session['entity_name'] = entity.data[0]['name']
     session['entity_number'] = entity.data[0]['entity_number']
+    session['entity_id'] = entity.data[0]['id']
     session['amount'] = paymentData['amount']
 
     try:
@@ -273,10 +285,21 @@ def executePayment():
 
     newAmount = float(session['acc_amount']) - float(session['amount'])
 
-    updateAcc = supabase.table('user_bank_acc') \
+    supabase.table('user_bank_acc') \
                 .update({'acc_amount': newAmount}) \
                 .eq('id', session['acc_id']) \
                 .execute()
+
+    supabase.table('payments_history') \
+        .insert({
+            'user_bank_acc_id': session['acc_id'],
+            'user_id': session['user_id'],
+            'entity_id': session['entity_id'],
+            'amount': session['amount'],
+            'date': datetime.now().isoformat(),
+            })\
+        .execute()
+
     #TODO: redirecionar para dashboard
     return redirect(f'dashboard/{session["user_id"]}')
 
@@ -295,7 +318,7 @@ def verifyTransfer():
     try:
         if int(transferData['iban']) == iban.data[0]['acc_iban']:
             accBalance = supabase.table('user_bank_acc')\
-                        .select('id', 'acc_amount, acc_type')\
+                        .select('id', 'acc_amount, acc_type, acc_iban')\
                         .eq('user_id', id)\
                         .execute()
 
@@ -304,6 +327,7 @@ def verifyTransfer():
                     if float(acc['acc_amount']) >= float(transferData['amount']):
                         # guarda os valores nos dados da sessão
                         session['acc_amount'] = float(acc['acc_amount'])
+                        session['sender_iban'] = float(acc['acc_iban'])
                         session['acc_id'] = acc['id']
                         print(session['acc_id'])
                         print(session['acc_amount'])
@@ -331,7 +355,7 @@ def executeTransfer():
 
     newAmountOrig = float(session['acc_amount']) - float(session['amount'])
 
-    updateAcc = supabase.table('user_bank_acc') \
+    supabase.table('user_bank_acc') \
                 .update({'acc_amount': newAmountOrig}) \
                 .eq('id', session['acc_id']) \
                 .execute()
@@ -343,10 +367,30 @@ def executeTransfer():
 
     newAmountDest = float(response.data[0]['acc_amount']) + float(session['amount'])
 
-    updateAcc = supabase.table('user_bank_acc') \
+    supabase.table('user_bank_acc') \
         .update({'acc_amount': newAmountDest}) \
         .eq('acc_iban', session['iban']) \
         .execute()
+
+    sender_id = supabase.table('user_bank_acc') \
+        .select('id')\
+        .eq('acc_iban', session['sender_iban'])\
+        .execute()
+
+    receiver_id = supabase.table('user_bank_acc') \
+        .select('id') \
+        .eq('acc_iban', session['iban']) \
+        .execute()
+
+    supabase.table('transfers_history')\
+        .insert({
+            'amount': session['amount'],
+            'date': datetime.now().isoformat(),
+            'sender_acc_id': sender_id.data[0]['id'],
+            'receiver_acc_id': receiver_id.data[0]['id'],
+            'user_id': session['user_id'],
+    })\
+    .execute()
 
     #TODO: redirecionar para dashboard
     return redirect(f'dashboard/{session["user_id"]}')
@@ -358,15 +402,14 @@ def sendAccMovements():
     accIban = request.form['acc_iban']
 
     #create a pdf with account movements
-    generatePDF(accIban, session['user_id'])
+    generatePDF(accIban)
     data = {
         "to": session['email'],
         "subject": accIban,
     }
     try:
         sendEmail(data)
-        return redirect(f'dashboard/{session["user_id"]}')
-        return jsonify('Email Sent')
+        return redirect('/sendEmail')
 
     except requests.exceptions.RequestException as e:
         return jsonify({'error': str(e)}), 500
