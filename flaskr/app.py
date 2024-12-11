@@ -183,10 +183,12 @@ def createAcc():
 
     accountAmount = (
         supabase.table('user_bank_acc')
-        .select('acc_amount, user_id(id)')
+        .select('acc_amount')
         .eq('acc_type', 'Conta à Ordem')
+        .eq('user_id', id)
         .execute()
     )
+    print(accountAmount)
 
     if value == '':
         value = 0
