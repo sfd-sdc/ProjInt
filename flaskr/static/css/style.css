@@ -1,13 +1,13 @@
 /* css/style.css */
 
-/* Reset some default browser styles */
+/* Reset a algumass propriedades em todas as tags  */
 * {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
 }
 
-/* Style the body */
+/* Define o estilo do body */
 body {
     font-family: Arial, sans-serif;
     line-height: 1.6;
@@ -16,6 +16,7 @@ body {
     padding: 20px;
 }
 
+/* centra o body */
 .body-home {
     position: absolute;
     overflow: hidden;
@@ -24,17 +25,18 @@ body {
     bottom: 10px;
     left: 10px;
 }
-
+/* define o tamanho do titulo da home page */
 .title-home {
     font-size: 100px;
 }
-
+/* botoes da home page */
 .button-home {
     height: 50px;
     width: 100px;
     margin: 10px;
 }
 
+/* centra os botoes da homepage */
 .buttons-container {
     display: flex;
     justify-content: center;
@@ -42,6 +44,7 @@ body {
     padding-top: 20px;
 }
 
+/* posicionamento dos botoes */
 .button-submit {
     display: block;
     margin: 10px auto;
@@ -60,7 +63,7 @@ body {
     font-size: 10px;
 }
 
-/* Style the header */
+/* Posicionamento da nav bar */
 
 .nav-bar {
     display: flex;
@@ -68,12 +71,14 @@ body {
     align-items: center;
 }
 
+/* linha horinzontal */
 hr {
     outline: #008dd5 solid 1px;
     border: #008dd5 solid 1px;
     margin-top: 5px;
 }
 
+/* todas as paginas que tem quadro azul */
 .content {
     display: flex;
     flex-direction: column;
@@ -87,31 +92,36 @@ hr {
     width: 700px;
 }
 
+/* formulario de novo utilizdor  */
+/*  fica em duas colunas  */
 .user-form {
     display: grid;
     grid-template-columns: 1fr 1fr;
 }
 
+/* usar as duas colunas */
 .form-row {
     display: flex;
     justify-content: center;
     gap: 20px;
 }
 
+/* mete o conteudo flex na vertical */
 .column {
     display: flex;
     flex-direction: column;
     margin-left: 100px;
 }
 
+/* colocar o botao a ocupar o espaço das duas colunas */
 .form-actions {
     grid-column: span 2;
     text-align: center;
 }
 
-#date {
-    margin-top: 15px;
-}
+/* #date { */
+/*     margin-top: 15px; */
+/* } */
 
 h1 {
     color: #008dd5;
@@ -124,6 +134,7 @@ p {
     margin-top: 10px;
 }
 
+/* todos os inputs do tipo text */
 input[type="text"] {
     appearance: none;
     -webkit-appearance: none;
@@ -137,6 +148,7 @@ input[type="text"] {
     color: #008dd5;
 }
 
+/* todos os inputs do tipo email */
 input[type="email"] {
     appearance: none;
     -webkit-appearance: none;
@@ -150,6 +162,7 @@ input[type="email"] {
     color: #008dd5;
 }
 
+/* todos os inputs do tipo telefone */
 input[type="tel"] {
     appearance: none;
     -webkit-appearance: none;
@@ -163,6 +176,7 @@ input[type="tel"] {
     color: #008dd5;
 }
 
+/* todos os inputs do tipo password */
 input[type="password"] {
     appearance: none;
     -webkit-appearance: none;
@@ -176,6 +190,7 @@ input[type="password"] {
     color: #008dd5;
 }
 
+/* todos os inputs do tipo checkbox */
 input[type="checkbox"] {
     appearance: none;
     -webkit-appearance: none;
@@ -193,6 +208,8 @@ input[type="checkbox"] {
     place-content: center;
 }
 
+/* todos os inputs do tipo checkbox */
+/* antes de estar selecionado */
 input[type="checkbox"]::before {
     content: "";
     width: 0.65em;
@@ -216,6 +233,7 @@ div.radio {
     margin-left: -2em;
 }
 
+/* todos os inputs do tipo radio */
 input[type="radio"] {
     appearance: none;
     -webkit-appearance: none;
@@ -449,12 +467,6 @@ select option {
     border: none; /* Remove qualquer borda extra */
 }
 
-/* Ajuste de estilo para dispositivos móveis */
-@media (hover: none) {
-    select:hover {
-        background-color: rgba(0, 141, 213, 0.1); /* Suaviza o hover */
-    }
-}
 
 .bank-account {
     width: calc(50% - 5px);
@@ -501,6 +513,20 @@ details > summary {
     list-style: none;
 }
 
+footer {
+    margin-top: 50px;
+    color: #008dd5;
+}
+
+/* Ajuste de estilo para dispositivos sem suporte a hover/sem rato */
+@media (hover: none) {
+    select:hover {
+        background-color: rgba(0, 141, 213, 0.1); /* Suaviza o hover */
+    }
+}
+
+/* responsividade */
+/* em dispositivos moveis, todas as paginas com duas colunas passam ater apenas uma */
 @media screen and (max-width: 900px) {
     .grid {
         grid-template-columns: auto;
@@ -544,7 +570,3 @@ details > summary {
     }
 }
 
-footer {
-    margin-top: 50px;
-    color: #008dd5;
-}
